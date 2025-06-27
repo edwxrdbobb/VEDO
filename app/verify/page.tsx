@@ -3,396 +3,290 @@
 import type React from "react"
 
 import { useState } from "react"
-import { useSearchParams } from "next/navigation"
-import Link from "next/link"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
+import { Shield, Search, CheckCircle, AlertCircle, Globe, Calendar, Award } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import {
-  Shield,
-  Search,
-  CheckCircle,
-  XCircle,
-  User,
-  Calendar,
-  Globe,
-  Award,
-  FileText,
-  AlertTriangle,
-} from "lucide-react"
-import { QRScanner } from "@/components/qr-scanner"
-import { ThemeToggle } from "@/components/theme-toggle"
-
-// Mock database of verified creators
-const verifiedCreators = [
-  {
-    id: "INFLO-2024-001247",
-    name: "Sarah Kamara",
-    creatorName: "TechSarah",
-    email: "sarah@techsarah.com",
-    status: "verified",
-    verificationLevel: "Gold",
-    joinDate: "2024-01-15",
-    contentType: "Technology Blog",
-    platforms: ["Personal Blog", "YouTube", "LinkedIn"],
-    followers: 15420,
-    contentCount: 156,
-    lastVerified: "2024-01-20",
-    avatar: "/placeholder-user.jpg",
-  },
-  {
-    id: "INFLO-2024-001248",
-    name: "Mohamed Bangura",
-    creatorName: "SL Blogger",
-    email: "mohamed@slblogger.com",
-    status: "pending",
-    verificationLevel: "Bronze",
-    joinDate: "2024-01-18",
-    contentType: "Lifestyle Blog",
-    platforms: ["Instagram", "TikTok"],
-    followers: 8930,
-    contentCount: 89,
-    lastVerified: "2024-01-19",
-    avatar: "/placeholder-user.jpg",
-  },
-  {
-    id: "INFLO-2024-001249",
-    name: "Fatima Sesay",
-    creatorName: "EduSL",
-    email: "fatima@edusl.com",
-    status: "verified",
-    verificationLevel: "Silver",
-    joinDate: "2024-01-10",
-    contentType: "Educational Content",
-    platforms: ["YouTube", "Facebook", "WhatsApp"],
-    followers: 22100,
-    contentCount: 203,
-    lastVerified: "2024-01-21",
-    avatar: "/placeholder-user.jpg",
-  },
-]
+import { mockAuth } from "@/lib/mock-data"
 
 export default function VerifyPage() {
-  const searchParams = useSearchParams()
-  const initialSearch = searchParams.get("search") || ""
-
-  const [searchQuery, setSearchQuery] = useState(initialSearch)
-  const [searchResult, setSearchResult] = useState<(typeof verifiedCreators)[0] | null>(null)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [searchResult, setSearchResult] = useState(null)
   const [isSearching, setIsSearching] = useState(false)
   const [error, setError] = useState("")
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!searchQuery.trim()) return
-
     setIsSearching(true)
     setError("")
     setSearchResult(null)
 
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    try {
+      const result = await mockAuth.searchCreator(searchQuery)
 
-    // Search in mock database
-    const result = verifiedCreators.find(
-      (creator) =>
-        creator.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        creator.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        creator.creatorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        creator.email.toLowerCase().includes(searchQuery.toLowerCase()),
-    )
-
-    if (result) {
-      setSearchResult(result)
-    } else {
-      setError("Creator not found in INFLO database")
-    }
-
-    setIsSearching(false)
-  }
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "verified":
-        return <CheckCircle className="h-5 w-5 text-green-600" />
-      case "pending":
-        return <AlertTriangle className="h-5 w-5 text-yellow-600" />
-      case "rejected":
-        return <XCircle className="h-5 w-5 text-red-600" />
-      default:
-        return <AlertTriangle className="h-5 w-5 text-gray-600" />
-    }
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "verified":
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-      case "pending":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
-      case "rejected":
-        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-      default:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
-    }
-  }
-
-  const getVerificationLevelColor = (level: string) => {
-    switch (level) {
-      case "Gold":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
-      case "Silver":
-        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
-      case "Bronze":
-        return "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200"
-      default:
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+      if (result) {
+        setSearchResult({
+          id: result.vedo_id,
+          name: `${result.first_name} ${result.last_name}`,
+          creatorName: result.creatorName,
+          email: result.email,
+          status: result.verification_status,
+          verificationLevel: result.verification_level,
+          joinDate: result.created_at,
+          contentType: result.content_type,
+          platforms: [result.primary_platform],
+          totalContent: result.content_submissions?.length || 0,
+          lastActive: result.updated_at,
+          website: result.website_url,
+          socialMedia: {
+            twitter: result.twitter_url,
+            linkedin: result.linkedin_url,
+          },
+        })
+      } else {
+        setSearchResult("not_found")
+      }
+    } catch (error) {
+      setError("Search failed. Please try again.")
+    } finally {
+      setIsSearching(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-      {/* Header */}
-      <header className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2">
-              <Shield className="h-6 w-6 text-blue-600" />
-              <div>
-                <span className="font-bold text-gray-900 dark:text-white">INFLO</span>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Verify Creators</p>
-              </div>
-            </Link>
-            <div className="flex items-center gap-4">
-              <ThemeToggle />
-              <QRScanner />
-              <Link href="/login">
-                <Button variant="outline">Sign In</Button>
-              </Link>
-            </div>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="container mx-auto px-4 max-w-4xl">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <Shield className="h-8 w-8 text-blue-600" />
+            <h1 className="text-2xl font-bold">Creator Verification</h1>
           </div>
+          <p className="text-gray-600">
+            Verify the authenticity of digital content creators registered in Sierra Leone
+          </p>
         </div>
-      </header>
 
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-2xl mx-auto">
-          {/* Title */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Verify Digital Creator</h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              Search for a creator to verify their INFLO status and authenticity
-            </p>
-          </div>
+        {/* Search Form */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Search className="h-5 w-5" />
+              Search Creator
+            </CardTitle>
+            <CardDescription>
+              Enter creator name, VEDO ID, email, or website URL to verify their registration status
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSearch} className="space-y-4">
+              <div>
+                <Label htmlFor="search">Search Query</Label>
+                <Input
+                  id="search"
+                  placeholder="Enter creator name, VEDO ID, email, or website..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  required
+                />
+              </div>
+              <Button type="submit" disabled={isSearching} className="w-full">
+                {isSearching ? "Searching..." : "Verify Creator"}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
 
-          {/* Search Form */}
-          <Card className="mb-8 dark:bg-gray-800 dark:border-gray-700">
+        {/* Search Results */}
+        {searchResult && (
+          <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 dark:text-white">
-                <Search className="h-5 w-5" />
-                Creator Search
-              </CardTitle>
-              <CardDescription className="dark:text-gray-400">
-                Enter creator ID, name, or username to verify their status
-              </CardDescription>
+              <CardTitle>Verification Results</CardTitle>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSearch} className="space-y-4">
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="e.g., INFLO-2024-001247 or TechSarah"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="flex-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                  />
-                  <Button type="submit" disabled={isSearching}>
-                    {isSearching ? (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-                    ) : (
-                      <Search className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">
-                  <p className="mb-1">Try searching for:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {["INFLO-2024-001247", "TechSarah", "SL Blogger", "EduSL"].map((example) => (
-                      <Button
-                        key={example}
-                        variant="outline"
-                        size="sm"
-                        type="button"
-                        onClick={() => setSearchQuery(example)}
-                        className="text-xs dark:border-gray-600 dark:hover:bg-gray-700"
-                      >
-                        {example}
-                      </Button>
-                    ))}
+              {error && (
+                <Alert variant="destructive" className="mb-4">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+              {searchResult === "not_found" ? (
+                <div className="text-center py-8">
+                  <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Creator Not Found</h3>
+                  <p className="text-gray-600 mb-4">
+                    No verified creator found matching your search query. This creator may not be registered with VEDO.
+                  </p>
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-left">
+                    <h4 className="font-medium text-yellow-800 mb-2">What this means:</h4>
+                    <ul className="text-sm text-yellow-700 space-y-1">
+                      <li>• The creator is not registered in the VEDO system</li>
+                      <li>• The search information may be incorrect</li>
+                      <li>• The creator's registration may be pending approval</li>
+                    </ul>
                   </div>
                 </div>
-              </form>
+              ) : (
+                <div className="space-y-6">
+                  {/* Verification Status */}
+                  <div className="flex items-center justify-center p-6 bg-green-50 border border-green-200 rounded-lg">
+                    <CheckCircle className="h-8 w-8 text-green-600 mr-3" />
+                    <div className="text-center">
+                      <h3 className="text-lg font-semibold text-green-900">Verified Creator</h3>
+                      <p className="text-green-700">This creator is officially registered and verified with VEDO</p>
+                    </div>
+                  </div>
+
+                  {/* Creator Information */}
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <div>
+                        <Label className="text-sm font-medium text-gray-500">VEDO ID</Label>
+                        <p className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">{searchResult.id}</p>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium text-gray-500">Full Name</Label>
+                        <p className="font-medium">{searchResult.name}</p>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium text-gray-500">Creator/Brand Name</Label>
+                        <p className="font-medium">{searchResult.creatorName}</p>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium text-gray-500">Content Type</Label>
+                        <p>{searchResult.contentType}</p>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium text-gray-500">Verification Level</Label>
+                        <Badge className="bg-yellow-100 text-yellow-800">
+                          <Award className="h-3 w-3 mr-1" />
+                          {searchResult.verificationLevel}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div>
+                        <Label className="text-sm font-medium text-gray-500">Registration Date</Label>
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-gray-400" />
+                          <span>{new Date(searchResult.joinDate).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium text-gray-500">Total Content</Label>
+                        <p>{searchResult.totalContent} verified pieces</p>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium text-gray-500">Last Active</Label>
+                        <p>{new Date(searchResult.lastActive).toLocaleDateString()}</p>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium text-gray-500">Platforms</Label>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {searchResult.platforms.map((platform, index) => (
+                            <Badge key={index} variant="outline" className="text-xs">
+                              {platform}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Contact Information */}
+                  <div className="border-t pt-6">
+                    <h4 className="font-medium mb-4">Verified Contact Information</h4>
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-sm font-medium text-gray-500">Website</Label>
+                        <div className="flex items-center gap-2">
+                          <Globe className="h-4 w-4 text-gray-400" />
+                          <a
+                            href={searchResult.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline"
+                          >
+                            {searchResult.website}
+                          </a>
+                        </div>
+                      </div>
+                      <div>
+                        <Label className="text-sm font-medium text-gray-500">Social Media</Label>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 text-sm">
+                            <span className="text-gray-400">Twitter:</span>
+                            <span>{searchResult.socialMedia.twitter}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm">
+                            <span className="text-gray-400">LinkedIn:</span>
+                            <span>{searchResult.socialMedia.linkedin}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Verification Certificate */}
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h4 className="font-medium text-blue-900 mb-2">Verification Certificate</h4>
+                    <p className="text-sm text-blue-800 mb-3">
+                      This creator has been verified by the Government of Sierra Leone's VEDO system and is authorized
+                      to create and monetize digital content under Sierra Leone's IT and Cybercrime Laws.
+                    </p>
+                    <Button variant="outline" size="sm" className="bg-white">
+                      Download Certificate
+                    </Button>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
+        )}
 
-          {/* Error Message */}
-          {error && (
-            <Alert className="mb-8 border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20">
-              <XCircle className="h-4 w-4" />
-              <AlertDescription className="text-red-800 dark:text-red-200">{error}</AlertDescription>
-            </Alert>
-          )}
-
-          {/* Search Result */}
-          {searchResult && (
-            <Card className="mb-8 dark:bg-gray-800 dark:border-gray-700">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2 dark:text-white">
-                    {getStatusIcon(searchResult.status)}
-                    Verification Result
-                  </CardTitle>
-                  <Badge className={getStatusColor(searchResult.status)}>
-                    {searchResult.status.charAt(0).toUpperCase() + searchResult.status.slice(1)}
-                  </Badge>
+        {/* Information Section */}
+        <Card className="mt-8">
+          <CardHeader>
+            <CardTitle>About VEDO Verification</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <h4 className="font-medium mb-2">What does verification mean?</h4>
+              <p className="text-sm text-gray-600">
+                VEDO verification confirms that a content creator is officially registered with the Government of Sierra
+                Leone, has provided valid identification, and agrees to comply with intellectual property and cybercrime
+                laws.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-medium mb-2">Verification Levels</h4>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline">Bronze</Badge>
+                  <span className="text-sm text-gray-600">Basic identity verification</span>
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Creator Info */}
-                <div className="flex items-start gap-4">
-                  <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-                    <User className="h-8 w-8 text-blue-600" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{searchResult.name}</h3>
-                    <p className="text-gray-600 dark:text-gray-400">@{searchResult.creatorName}</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-500">{searchResult.email}</p>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <Badge className="bg-gray-100 text-gray-800">Silver</Badge>
+                  <span className="text-sm text-gray-600">Identity + content portfolio verification</span>
                 </div>
-
-                {/* Verification Details */}
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">INFLO ID</span>
-                      <span className="font-mono text-sm dark:text-white">{searchResult.id}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Verification Level</span>
-                      <Badge className={getVerificationLevelColor(searchResult.verificationLevel)}>
-                        <Award className="h-3 w-3 mr-1" />
-                        {searchResult.verificationLevel}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Content Type</span>
-                      <span className="text-sm font-medium dark:text-white">{searchResult.contentType}</span>
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Join Date</span>
-                      <span className="text-sm font-medium flex items-center gap-1 dark:text-white">
-                        <Calendar className="h-3 w-3" />
-                        {searchResult.joinDate}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Content Count</span>
-                      <span className="text-sm font-medium flex items-center gap-1 dark:text-white">
-                        <FileText className="h-3 w-3" />
-                        {searchResult.contentCount}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Last Verified</span>
-                      <span className="text-sm font-medium dark:text-white">{searchResult.lastVerified}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Platforms */}
-                <div>
-                  <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Active Platforms</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {searchResult.platforms.map((platform) => (
-                      <Badge key={platform} variant="outline" className="text-xs">
-                        <Globe className="h-3 w-3 mr-1" />
-                        {platform}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Verification Certificate */}
-                {searchResult.status === "verified" && (
-                  <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <CheckCircle className="h-5 w-5 text-green-600" />
-                      <h4 className="font-medium text-green-800 dark:text-green-200">Verification Certificate</h4>
-                    </div>
-                    <p className="text-sm text-green-700 dark:text-green-300">
-                      This creator has been officially verified by INFLO and meets all authenticity requirements. Their
-                      content and identity have been validated by Sierra Leone's digital creator verification system.
-                    </p>
-                  </div>
-                )}
-
-                {searchResult.status === "pending" && (
-                  <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <AlertTriangle className="h-5 w-5 text-yellow-600" />
-                      <h4 className="font-medium text-yellow-800 dark:text-yellow-200">Verification Pending</h4>
-                    </div>
-                    <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                      This creator's verification is currently under review. Please check back later for updated status.
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Additional Info */}
-          <Card className="dark:bg-gray-800 dark:border-gray-700">
-            <CardHeader>
-              <CardTitle className="dark:text-white">About INFLO Verification</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-medium text-gray-900 dark:text-white mb-2">What is INFLO?</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    INFLO is Sierra Leone's official verification system for digital content creators, ensuring
-                    authenticity and building trust in the digital space.
-                  </p>
-                </div>
-                <div>
-                  <h4 className="font-medium text-gray-900 dark:text-white mb-2">Verification Levels</h4>
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 text-xs">
-                        Gold
-                      </Badge>
-                      <span className="text-xs text-gray-600 dark:text-gray-400">Premium verified creators</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge className="bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 text-xs">
-                        Silver
-                      </Badge>
-                      <span className="text-xs text-gray-600 dark:text-gray-400">Standard verified creators</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge className="bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200 text-xs">
-                        Bronze
-                      </Badge>
-                      <span className="text-xs text-gray-600 dark:text-gray-400">Basic verified creators</span>
-                    </div>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <Badge className="bg-yellow-100 text-yellow-800">Gold</Badge>
+                  <span className="text-sm text-gray-600">Full verification with business registration</span>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+            <div>
+              <h4 className="font-medium mb-2">For Businesses and Organizations</h4>
+              <p className="text-sm text-gray-600">
+                Use this verification system to confirm the authenticity of content creators before partnerships,
+                collaborations, or content licensing agreements.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

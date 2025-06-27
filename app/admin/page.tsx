@@ -20,150 +20,59 @@ import {
   UserCheck,
   FileCheck,
 } from "lucide-react"
-import { useAuth } from "@/components/auth-provider"
-import { useRouter } from "next/navigation"
 
-// Mock data
-const mockStats = {
-  totalCreators: 247,
-  pendingApplications: 12,
-  verifiedContent: 1856,
-  flaggedContent: 3,
-  monthlyRegistrations: 28,
-  activeCreators: 189,
-}
-
-const mockPendingApplications = [
-  {
-    id: "app_001",
-    name: "John Doe",
-    creatorName: "TechJohn",
-    contentType: "Technology Blog",
-    submissionDate: "2024-01-22",
-    status: "pending_review",
-    documentsComplete: true,
-  },
-  {
-    id: "app_002",
-    name: "Jane Smith",
-    creatorName: "ArtisticJane",
-    contentType: "Digital Art",
-    submissionDate: "2024-01-21",
-    status: "under_review",
-    documentsComplete: false,
-  },
-  {
-    id: "app_003",
-    name: "Mike Johnson",
-    creatorName: "MusicMike",
-    contentType: "Music",
-    submissionDate: "2024-01-20",
-    status: "pending",
-    documentsComplete: true,
-  },
-]
-
-const mockRecentActivity = [
-  {
-    id: 1,
-    description: "New creator registration: John Doe",
-    timestamp: "2 hours ago",
-    status: "pending",
-  },
-  {
-    id: 2,
-    description: "Application approved: Sarah Kamara",
-    timestamp: "4 hours ago",
-    status: "completed",
-  },
-  {
-    id: 3,
-    description: "Content flagged for review",
-    timestamp: "6 hours ago",
-    status: "pending",
-  },
-  {
-    id: 4,
-    description: "System backup completed",
-    timestamp: "1 day ago",
-    status: "completed",
-  },
-]
+import { mockAdmin } from "@/lib/mock-data"
 
 export default function AdminPage() {
-  const { user, loading } = useAuth()
-  const router = useRouter()
-  const [stats, setStats] = useState(mockStats)
-  const [pendingApplications, setPendingApplications] = useState(mockPendingApplications)
-  const [recentActivity, setRecentActivity] = useState(mockRecentActivity)
-  const [isLoading, setIsLoading] = useState(false)
+  const [stats, setStats] = useState({
+    totalCreators: 0,
+    pendingApplications: 0,
+    verifiedContent: 0,
+    flaggedContent: 0,
+    monthlyRegistrations: 0,
+    activeCreators: 0,
+  })
+
+  const [pendingApplications, setPendingApplications] = useState([])
+  const [recentActivity, setRecentActivity] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    if (!loading && (!user || user.role !== "admin")) {
-      router.push("/login")
+    const loadData = async () => {
+      try {
+        const [statsData, applicationsData, activityData] = await Promise.all([
+          mockAdmin.getSystemStats(),
+          mockAdmin.getPendingApplications(),
+          mockAdmin.getRecentActivity(),
+        ])
+
+        setStats(statsData)
+        setPendingApplications(applicationsData)
+        setRecentActivity(activityData)
+      } catch (error) {
+        console.error("Failed to load admin data:", error)
+      } finally {
+        setIsLoading(false)
+      }
     }
-  }, [user, loading, router])
 
-  const handleApprove = async (applicationId: string) => {
-    setIsLoading(true)
+    loadData()
+  }, [])
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-
-    // Update the application status
-    setPendingApplications((prev) => prev.filter((app) => app.id !== applicationId))
-
-    // Add to recent activity
-    setRecentActivity((prev) => [
-      {
-        id: Date.now(),
-        description: `Application approved: ${pendingApplications.find((app) => app.id === applicationId)?.name}`,
-        timestamp: "Just now",
-        status: "completed",
-      },
-      ...prev,
-    ])
-
-    // Update stats
-    setStats((prev) => ({
-      ...prev,
-      pendingApplications: prev.pendingApplications - 1,
-      activeCreators: prev.activeCreators + 1,
-    }))
-
-    setIsLoading(false)
+  const handleApprove = async (creatorId: string) => {
+    try {
+      const result = await mockAdmin.approveApplication(creatorId, "current-admin-id")
+      if (result.success) {
+        // Refresh the data
+        const applicationsData = await mockAdmin.getPendingApplications()
+        setPendingApplications(applicationsData)
+      }
+    } catch (error) {
+      console.error("Failed to approve application:", error)
+    }
   }
 
-  const handleReject = async (applicationId: string) => {
-    setIsLoading(true)
-
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-
-    // Update the application status
-    setPendingApplications((prev) => prev.filter((app) => app.id !== applicationId))
-
-    // Add to recent activity
-    setRecentActivity((prev) => [
-      {
-        id: Date.now(),
-        description: `Application rejected: ${pendingApplications.find((app) => app.id === applicationId)?.name}`,
-        timestamp: "Just now",
-        status: "completed",
-      },
-      ...prev,
-    ])
-
-    // Update stats
-    setStats((prev) => ({
-      ...prev,
-      pendingApplications: prev.pendingApplications - 1,
-    }))
-
-    setIsLoading(false)
-  }
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -172,10 +81,6 @@ export default function AdminPage() {
         </div>
       </div>
     )
-  }
-
-  if (!user || user.role !== "admin") {
-    return null
   }
 
   return (
@@ -194,21 +99,13 @@ export default function AdminPage() {
               </Badge>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">Welcome, {user.name}</span>
               <Button variant="outline" size="sm">
                 <Download className="h-4 w-4 mr-1" />
                 Export Data
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  localStorage.removeItem("vedo_user")
-                  sessionStorage.removeItem("vedo_user")
-                  router.push("/login")
-                }}
-              >
-                Sign Out
+              <Button size="sm">
+                <AlertTriangle className="h-4 w-4 mr-1" />
+                System Alerts
               </Button>
             </div>
           </div>
@@ -354,29 +251,13 @@ export default function AdminPage() {
                           size="sm"
                           className="bg-green-600 hover:bg-green-700"
                           onClick={() => handleApprove(application.id)}
-                          disabled={isLoading}
                         >
                           <CheckCircle className="h-4 w-4 mr-1" />
                           Approve
                         </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => handleReject(application.id)}
-                          disabled={isLoading}
-                        >
-                          Reject
-                        </Button>
                       </div>
                     </div>
                   ))}
-                  {pendingApplications.length === 0 && (
-                    <div className="text-center py-8">
-                      <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">All Caught Up!</h3>
-                      <p className="text-gray-600">No pending applications to review at this time.</p>
-                    </div>
-                  )}
                 </div>
               </CardContent>
             </Card>
@@ -398,7 +279,7 @@ export default function AdminPage() {
                       />
                       <div className="flex-1">
                         <p className="text-sm font-medium">{activity.description}</p>
-                        <p className="text-xs text-gray-500">{activity.timestamp}</p>
+                        <p className="text-xs text-gray-500">{new Date(activity.timestamp).toLocaleString()}</p>
                       </div>
                       <Badge
                         variant={activity.status === "completed" ? "default" : "secondary"}
@@ -440,14 +321,7 @@ export default function AdminPage() {
                     More Filters
                   </Button>
                 </div>
-                <div className="text-center py-8">
-                  <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Creator Management</h3>
-                  <p className="text-gray-600">
-                    This section would contain a comprehensive list of all registered creators with search, filter, and
-                    management capabilities.
-                  </p>
-                </div>
+                <p className="text-gray-600">Creator management interface would be implemented here...</p>
               </CardContent>
             </Card>
           </TabsContent>
@@ -459,14 +333,7 @@ export default function AdminPage() {
                 <CardDescription>Monitor and moderate creator content across platforms</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8">
-                  <FileCheck className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Content Monitoring</h3>
-                  <p className="text-gray-600">
-                    This section would contain tools for monitoring and moderating content submissions, flagged content,
-                    and verification workflows.
-                  </p>
-                </div>
+                <p className="text-gray-600">Content monitoring dashboard would be implemented here...</p>
               </CardContent>
             </Card>
           </TabsContent>
@@ -478,14 +345,7 @@ export default function AdminPage() {
                 <CardDescription>Comprehensive analytics and reporting for the VEDO system</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8">
-                  <TrendingUp className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">System Analytics</h3>
-                  <p className="text-gray-600">
-                    This section would contain detailed analytics, charts, and reports about system usage, creator
-                    activity, and content performance.
-                  </p>
-                </div>
+                <p className="text-gray-600">Analytics dashboard would be implemented here...</p>
               </CardContent>
             </Card>
           </TabsContent>
@@ -497,14 +357,7 @@ export default function AdminPage() {
                 <CardDescription>System settings, user management, and configuration</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8">
-                  <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">System Administration</h3>
-                  <p className="text-gray-600">
-                    This section would contain system configuration options, user role management, and administrative
-                    tools.
-                  </p>
-                </div>
+                <p className="text-gray-600">System administration panel would be implemented here...</p>
               </CardContent>
             </Card>
           </TabsContent>

@@ -6,9 +6,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Shield, Users, CheckCircle, AlertCircle, Loader2, Play } from "lucide-react"
-import { initializeSystem, getSystemStatus } from "@/actions/init-system"
-import { getDemoCredentials } from "@/lib/init-demo-users"
+import { mockSystem } from "@/lib/mock-data"
 import { EnvironmentCheck } from "./environment-check"
+
+const getDemoCredentials = () => [
+  { email: "admin@vedo.gov.sl", password: "admin123", role: "admin" },
+  { email: "sarah@techsarah.com", password: "sarah123", role: "creator" },
+  { email: "mohamed@slblogger.com", password: "mohamed123", role: "creator" },
+  { email: "moderator@vedo.gov.sl", password: "moderator123", role: "moderator" },
+]
 
 export function SystemInitializer() {
   const [isInitializing, setIsInitializing] = useState(false)
@@ -27,7 +33,7 @@ export function SystemInitializer() {
 
   const checkStatus = async () => {
     try {
-      const status = await getSystemStatus()
+      const status = await mockSystem.getSystemStatus()
       setSystemStatus(status)
     } catch (error: any) {
       setSystemStatus({
@@ -43,7 +49,7 @@ export function SystemInitializer() {
     setInitResult(null)
 
     try {
-      const result = await initializeSystem()
+      const result = await mockSystem.initializeSystem()
       setInitResult(result)
       if (result.success) {
         await checkStatus() // Refresh status after successful initialization
@@ -101,7 +107,7 @@ export function SystemInitializer() {
               </div>
               <div className="flex items-center justify-between">
                 <span>Demo Users Created:</span>
-                <Badge variant="outline">{systemStatus.demoUsersCount}/5</Badge>
+                <Badge variant="outline">{systemStatus.demoUsersCount}/4</Badge>
               </div>
               {systemStatus.error && (
                 <Alert variant="destructive">
@@ -119,7 +125,7 @@ export function SystemInitializer() {
         </CardContent>
       </Card>
 
-      {/* Initialization Button */}
+      {/* Initialization Button - Only show if not initialized */}
       {systemStatus && !systemStatus.initialized && !systemStatus.error && (
         <Card>
           <CardHeader>
