@@ -2,375 +2,320 @@
 
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import {
-  Shield,
-  Users,
-  TrendingUp,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Filter,
-  Download,
-  Eye,
-  UserCheck,
-  FileCheck,
-} from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Users, FileText, TrendingUp, Clock, CheckCircle, XCircle, Eye, Shield, Settings, Bell } from "lucide-react"
+import { mockAdmin } from "@/lib/mock-data"
 
-import {
-  getPendingApplications,
-  getSystemStats,
-  approveCreatorApplication,
-  getRecentActivity,
-} from "@/actions/admin-actions"
-import { ProtectedRoute } from "@/components/protected-route"
-
-export default function AdminPage() {
-  const [stats, setStats] = useState({
-    totalCreators: 0,
-    pendingApplications: 0,
-    verifiedContent: 0,
-    flaggedContent: 0,
-    monthlyRegistrations: 0,
-    activeCreators: 0,
-  })
-
-  const [pendingApplications, setPendingApplications] = useState([])
-  const [recentActivity, setRecentActivity] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
+export default function AdminDashboard() {
+  const [applications, setApplications] = useState<any[]>([])
+  const [stats, setStats] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [statsData, applicationsData, activityData] = await Promise.all([
-          getSystemStats(),
-          getPendingApplications(),
-          getRecentActivity(),
-        ])
-
+        const [appsData, statsData] = await Promise.all([mockAdmin.getApplications(), mockAdmin.getSystemStats()])
+        setApplications(appsData)
         setStats(statsData)
-        setPendingApplications(applicationsData)
-        setRecentActivity(activityData)
       } catch (error) {
-        console.error("Failed to load admin data:", error)
+        console.error("Error loading admin data:", error)
       } finally {
-        setIsLoading(false)
+        setLoading(false)
       }
     }
 
     loadData()
   }, [])
 
-  const handleApprove = async (creatorId: string) => {
+  const handleApproveApplication = async (applicationId: string) => {
     try {
-      const result = await approveCreatorApplication(creatorId, "current-admin-id")
-      if (result.success) {
-        // Refresh the data
-        const applicationsData = await getPendingApplications()
-        setPendingApplications(applicationsData)
-      }
+      await mockAdmin.approveApplication(applicationId)
+      setApplications((prev) =>
+        prev.map((app) =>
+          app.id === applicationId
+            ? {
+                ...app,
+                status: "approved",
+                vedoId: `VEDO-${new Date().getFullYear()}-${Math.floor(Math.random() * 1000)
+                  .toString()
+                  .padStart(3, "0")}`,
+              }
+            : app,
+        ),
+      )
     } catch (error) {
-      console.error("Failed to approve application:", error)
+      console.error("Error approving application:", error)
     }
   }
 
-  if (isLoading) {
+  const handleRejectApplication = async (applicationId: string) => {
+    try {
+      await mockAdmin.rejectApplication(applicationId)
+      setApplications((prev) => prev.map((app) => (app.id === applicationId ? { ...app, status: "rejected" } : app)))
+    } catch (error) {
+      console.error("Error rejecting application:", error)
+    }
+  }
+
+  if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <Shield className="h-8 w-8 text-blue-600 mx-auto mb-4 animate-spin" />
-          <p>Loading admin dashboard...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading admin dashboard...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <ProtectedRoute requiredRole="admin">
-      <div className="min-h-screen bg-gray-50">
-        {/* Header */}
-        <header className="bg-white border-b">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <Shield className="h-6 w-6 text-blue-600" />
-                  <span className="font-bold">VEDO Admin Panel</span>
-                </div>
-                <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                  Government Access
-                </Badge>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm">
-                  <Download className="h-4 w-4 mr-1" />
-                  Export Data
-                </Button>
-                <Button size="sm">
-                  <AlertTriangle className="h-4 w-4 mr-1" />
-                  System Alerts
-                </Button>
-              </div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-4">
+              <img src="/placeholder-logo.svg" alt="VEDO" className="h-8 w-8" />
+              <h1 className="text-xl font-semibold text-gray-900">VEDO Admin Dashboard</h1>
+            </div>
+            <div className="flex items-center space-x-4">
+              <Badge variant="secondary" className="bg-red-100 text-red-800">
+                <Shield className="w-3 h-3 mr-1" />
+                Administrator
+              </Badge>
+              <Button variant="ghost" size="sm">
+                <Bell className="w-4 h-4" />
+              </Button>
+              <Avatar>
+                <AvatarImage src="/placeholder-user.jpg" alt="Admin" />
+                <AvatarFallback>AD</AvatarFallback>
+              </Avatar>
             </div>
           </div>
-        </header>
-
-        <div className="container mx-auto px-4 py-8">
-          {/* Dashboard Overview */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">VEDO Administration Dashboard</h1>
-            <p className="text-gray-600">
-              Monitor and manage the digital content creator registration system for Sierra Leone.
-            </p>
-          </div>
-
-          {/* Stats Overview */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-600">Total Creators</p>
-                    <p className="text-xl font-bold">{stats.totalCreators}</p>
-                  </div>
-                  <Users className="h-6 w-6 text-blue-600" />
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-600">Pending Apps</p>
-                    <p className="text-xl font-bold text-orange-600">{stats.pendingApplications}</p>
-                  </div>
-                  <Clock className="h-6 w-6 text-orange-600" />
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-600">Verified Content</p>
-                    <p className="text-xl font-bold text-green-600">{stats.verifiedContent}</p>
-                  </div>
-                  <FileCheck className="h-6 w-6 text-green-600" />
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-600">Flagged Content</p>
-                    <p className="text-xl font-bold text-red-600">{stats.flaggedContent}</p>
-                  </div>
-                  <AlertTriangle className="h-6 w-6 text-red-600" />
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-600">Monthly Registrations</p>
-                    <p className="text-xl font-bold">{stats.monthlyRegistrations}</p>
-                  </div>
-                  <TrendingUp className="h-6 w-6 text-purple-600" />
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-gray-600">Active Creators</p>
-                    <p className="text-xl font-bold text-cyan-600">{stats.activeCreators}</p>
-                  </div>
-                  <UserCheck className="h-6 w-6 text-cyan-600" />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Tabs defaultValue="applications" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="applications">Applications</TabsTrigger>
-              <TabsTrigger value="creators">Creators</TabsTrigger>
-              <TabsTrigger value="content">Content</TabsTrigger>
-              <TabsTrigger value="analytics">Analytics</TabsTrigger>
-              <TabsTrigger value="system">System</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="applications" className="space-y-6">
-              {/* Pending Applications */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Pending Applications</CardTitle>
-                  <CardDescription>Review and process new creator registration applications</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {pendingApplications.map((application) => (
-                      <div key={application.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-4">
-                            <div>
-                              <h4 className="font-medium">{application.name}</h4>
-                              <p className="text-sm text-gray-600">
-                                {application.creatorName} • {application.contentType}
-                              </p>
-                              <p className="text-xs text-gray-500">ID: {application.id}</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
-                            <span>Submitted: {application.submissionDate}</span>
-                            <Badge
-                              variant={application.status === "pending_review" ? "default" : "secondary"}
-                              className={
-                                application.status === "pending_review"
-                                  ? "bg-blue-100 text-blue-800"
-                                  : application.status === "under_review"
-                                    ? "bg-yellow-100 text-yellow-800"
-                                    : "bg-gray-100 text-gray-800"
-                              }
-                            >
-                              {application.status.replace("_", " ")}
-                            </Badge>
-                            {!application.documentsComplete && (
-                              <Badge variant="outline" className="text-red-600 border-red-200">
-                                Missing Documents
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm">
-                            <Eye className="h-4 w-4 mr-1" />
-                            Review
-                          </Button>
-                          <Button
-                            size="sm"
-                            className="bg-green-600 hover:bg-green-700"
-                            onClick={() => handleApprove(application.id)}
-                          >
-                            <CheckCircle className="h-4 w-4 mr-1" />
-                            Approve
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Recent Activity */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Recent Activity</CardTitle>
-                  <CardDescription>Latest system activities and administrative actions</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {recentActivity.map((activity) => (
-                      <div key={activity.id} className="flex items-center gap-4 p-3 border rounded-lg">
-                        <div
-                          className={`w-2 h-2 rounded-full ${
-                            activity.status === "completed" ? "bg-green-500" : "bg-yellow-500"
-                          }`}
-                        />
-                        <div className="flex-1">
-                          <p className="text-sm font-medium">{activity.description}</p>
-                          <p className="text-xs text-gray-500">{activity.timestamp}</p>
-                        </div>
-                        <Badge
-                          variant={activity.status === "completed" ? "default" : "secondary"}
-                          className={activity.status === "completed" ? "bg-green-100 text-green-800" : ""}
-                        >
-                          {activity.status}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="creators">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Creator Management</CardTitle>
-                  <CardDescription>Search, filter, and manage registered creators</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex gap-4 mb-6">
-                    <div className="flex-1">
-                      <Input placeholder="Search creators..." />
-                    </div>
-                    <Select>
-                      <SelectTrigger className="w-48">
-                        <SelectValue placeholder="Filter by status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Creators</SelectItem>
-                        <SelectItem value="verified">Verified</SelectItem>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="suspended">Suspended</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Button variant="outline">
-                      <Filter className="h-4 w-4 mr-1" />
-                      More Filters
-                    </Button>
-                  </div>
-                  <p className="text-gray-600">Creator management interface would be implemented here...</p>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="content">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Content Monitoring</CardTitle>
-                  <CardDescription>Monitor and moderate creator content across platforms</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600">Content monitoring dashboard would be implemented here...</p>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="analytics">
-              <Card>
-                <CardHeader>
-                  <CardTitle>System Analytics</CardTitle>
-                  <CardDescription>Comprehensive analytics and reporting for the VEDO system</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600">Analytics dashboard would be implemented here...</p>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="system">
-              <Card>
-                <CardHeader>
-                  <CardTitle>System Administration</CardTitle>
-                  <CardDescription>System settings, user management, and configuration</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600">System administration panel would be implemented here...</p>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
         </div>
       </div>
-    </ProtectedRoute>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Creators</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats?.totalCreators || 0}</div>
+              <p className="text-xs text-muted-foreground">
+                <TrendingUp className="inline w-3 h-3 mr-1" />+{stats?.monthlyGrowth || 0}% from last month
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Pending Applications</CardTitle>
+              <Clock className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats?.pendingApplications || 0}</div>
+              <p className="text-xs text-muted-foreground">Awaiting review</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Content</CardTitle>
+              <FileText className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats?.totalContent || 0}</div>
+              <p className="text-xs text-muted-foreground">Published content pieces</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">System Health</CardTitle>
+              <CheckCircle className="h-4 w-4 text-green-500" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">Healthy</div>
+              <p className="text-xs text-muted-foreground">All systems operational</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Main Content */}
+        <Tabs defaultValue="applications" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="applications">Applications</TabsTrigger>
+            <TabsTrigger value="creators">Creators</TabsTrigger>
+            <TabsTrigger value="content">Content</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="applications" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Creator Applications</CardTitle>
+                <CardDescription>Review and manage creator verification applications</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {applications.map((application) => (
+                    <div key={application.id} className="border rounded-lg p-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3 mb-2">
+                            <h3 className="font-semibold text-lg">{application.name}</h3>
+                            <Badge
+                              variant={
+                                application.status === "pending"
+                                  ? "secondary"
+                                  : application.status === "approved"
+                                    ? "default"
+                                    : "destructive"
+                              }
+                              className={
+                                application.status === "pending"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : application.status === "approved"
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-red-100 text-red-800"
+                              }
+                            >
+                              {application.status === "pending" && <Clock className="w-3 h-3 mr-1" />}
+                              {application.status === "approved" && <CheckCircle className="w-3 h-3 mr-1" />}
+                              {application.status === "rejected" && <XCircle className="w-3 h-3 mr-1" />}
+                              {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
+                            </Badge>
+                            {application.vedoId && <Badge variant="outline">{application.vedoId}</Badge>}
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                            <div>
+                              <p>
+                                <strong>Email:</strong> {application.email}
+                              </p>
+                              <p>
+                                <strong>Phone:</strong> {application.phone}
+                              </p>
+                              <p>
+                                <strong>Location:</strong> {application.location}
+                              </p>
+                            </div>
+                            <div>
+                              <p>
+                                <strong>Content Type:</strong> {application.contentType}
+                              </p>
+                              <p>
+                                <strong>Experience:</strong> {application.experience}
+                              </p>
+                              <p>
+                                <strong>Portfolio:</strong> {application.portfolio}
+                              </p>
+                            </div>
+                          </div>
+                          <p className="text-xs text-gray-500 mt-2">
+                            Submitted: {new Date(application.submittedAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        {application.status === "pending" && (
+                          <div className="flex space-x-2 ml-4">
+                            <Button
+                              size="sm"
+                              onClick={() => handleApproveApplication(application.id)}
+                              className="bg-green-600 hover:bg-green-700"
+                            >
+                              <CheckCircle className="w-4 h-4 mr-1" />
+                              Approve
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleRejectApplication(application.id)}
+                            >
+                              <XCircle className="w-4 h-4 mr-1" />
+                              Reject
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="creators" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Verified Creators</CardTitle>
+                <CardDescription>Manage verified content creators</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Creator Management</h3>
+                  <p className="text-gray-600">Creator management tools will appear here.</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="content" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Content Moderation</CardTitle>
+                <CardDescription>Review and moderate published content</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <Eye className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Content Moderation</h3>
+                  <p className="text-gray-600">Content moderation tools will appear here.</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>System Analytics</CardTitle>
+                <CardDescription>Platform usage and performance metrics</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <TrendingUp className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Analytics Dashboard</h3>
+                  <p className="text-gray-600">Detailed analytics will be available here.</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="settings" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>System Settings</CardTitle>
+                <CardDescription>Configure platform settings and preferences</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <Settings className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">System Configuration</h3>
+                  <p className="text-gray-600">System settings will be available here.</p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
   )
 }
