@@ -1,111 +1,116 @@
-/**
- * Front-end ONLY mock of the Supabase client.
- *
- * It fulfils the minimal surface that the rest of the app expects
- * (auth helpers + dumb query builder) without ever contacting a backend.
- */
-type SupabaseResponse<T> = Promise<{ data: T; error: null }>
+// Mock Supabase client for frontend-only operation
+class MockSupabaseAuth {
+  private listeners: Array<(event: string, session: any) => void> = []
+  private currentSession: any = null
 
-interface Session {
-  user: { id: string; email: string }
-}
+  onAuthStateChange(callback: (event: string, session: any) => void) {
+    this.listeners.push(callback)
 
-type AuthChangeHandler = (event: string, session: Session | null) => void
+    // Immediately call with current session
+    setTimeout(() => {
+      callback("INITIAL_SESSION", this.currentSession)
+    }, 0)
 
-class MockAuth {
-  // ------------------------------------------------------------------ state
-  private user: Session["user"] | null = null
-  private listeners: Set<AuthChangeHandler> = new Set()
-
-  // ----------------------------------------------------------- event helpers
-  private emit(event: "SIGNED_IN" | "SIGNED_OUT") {
-    const session = this.user ? { user: this.user } : null
-    this.listeners.forEach((cb) => cb(event, session))
+    return {
+      data: {
+        subscription: {
+          unsubscribe: () => {
+            const index = this.listeners.indexOf(callback)
+            if (index > -1) {
+              this.listeners.splice(index, 1)
+            }
+          },
+        },
+      },
+    }
   }
 
-  // -------------------------------------------------------------- api match
-  async signInWithPassword({
-    email,
-    password,
-  }: {
-    email: string
-    password: string
-  }) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const _pwd = password // we never validate in the mock
-    this.user = { id: `user-${Date.now()}`, email }
-    this.emit("SIGNED_IN")
-    return { data: { user: this.user }, error: null }
+  async getSession() {
+    return {
+      data: {
+        session: this.currentSession,
+      },
+      error: null,
+    }
   }
 
-  async signUp({
-    email,
-    password,
-    options,
-  }: {
-    email: string
-    password: string
-    options?: { data?: Record<string, unknown> }
-  }) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const _unused = password || options
-    this.user = { id: `user-${Date.now()}`, email }
-    this.emit("SIGNED_IN")
-    return { data: { user: this.user }, error: null }
+  async signInWithPassword({ email, password }: { email: string; password: string }) {
+    // Simulate API delay
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+
+    // Mock user data
+    const mockUser = {
+      id: "123",
+      email,
+      user_metadata: { role: "creator" },
+    }
+
+    this.currentSession = {
+      user: mockUser,
+      access_token: "mock-token",
+    }
+
+    // Emit sign in event
+    this.listeners.forEach((callback) => {
+      callback("SIGNED_IN", this.currentSession)
+    })
+
+    return {
+      data: {
+        user: mockUser,
+        session: this.currentSession,
+      },
+      error: null,
+    }
+  }
+
+  async signUp({ email, password }: { email: string; password: string }) {
+    // Simulate API delay
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+
+    return {
+      data: {
+        user: { id: "123", email },
+        session: null,
+      },
+      error: null,
+    }
   }
 
   async signOut() {
-    this.user = null
-    this.emit("SIGNED_OUT")
+    this.currentSession = null
+
+    // Emit sign out event
+    this.listeners.forEach((callback) => {
+      callback("SIGNED_OUT", null)
+    })
+
     return { error: null }
   }
+}
 
-  async getSession(): SupabaseResponse<{ session: Session | null }> {
-    return { data: { session: this.user ? { user: this.user } : null }, error: null }
-  }
+class MockSupabaseClient {
+  auth = new MockSupabaseAuth()
 
-  /**
-   * Mimics `supabase.auth.onAuthStateChange`.
-   * Returns `{ data: { subscription } }` where subscription has `unsubscribe`.
-   */
-  onAuthStateChange(callback: AuthChangeHandler) {
-    this.listeners.add(callback)
-    // Immediately fire the current state so UI gets initial user (like real SDK)
-    callback(this.user ? "SIGNED_IN" : "SIGNED_OUT", this.user ? { user: this.user } : null)
-
-    const subscription = {
-      unsubscribe: () => this.listeners.delete(callback),
+  from(table: string) {
+    return {
+      select: () => ({
+        eq: () => ({
+          single: () => Promise.resolve({ data: null, error: null }),
+        }),
+      }),
+      insert: () => Promise.resolve({ data: null, error: null }),
+      update: () => Promise.resolve({ data: null, error: null }),
+      delete: () => Promise.resolve({ data: null, error: null }),
     }
+  }
 
-    return { data: { subscription }, error: null }
+  storage = {
+    from: () => ({
+      upload: () => Promise.resolve({ data: null, error: null }),
+      getPublicUrl: () => ({ data: { publicUrl: "" } }),
+    }),
   }
 }
 
-class MockQueryBuilder {
-  // Chainable no-ops for `.select().eq().single()…`
-  select() {
-    return this
-  }
-  insert() {
-    return this
-  }
-  update() {
-    return this
-  }
-  delete() {
-    return this
-  }
-  eq() {
-    return this
-  }
-  single() {
-    return Promise.resolve({ data: null, error: null })
-  }
-}
-
-export const supabase = {
-  auth: new MockAuth(),
-  from(_table: string) {
-    return new MockQueryBuilder()
-  },
-}
+export const supabase = new MockSupabaseClient()

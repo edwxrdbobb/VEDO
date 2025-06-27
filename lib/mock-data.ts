@@ -1,338 +1,225 @@
-// Mock data store to simulate backend functionality
-export interface MockUser {
-  id: string
-  email: string
-  password: string
-  role: "creator" | "admin" | "moderator"
-  firstName?: string
-  lastName?: string
-  creatorName?: string
-  verified?: boolean
-}
+// Mock data for the VEDO system
 
-export interface MockCreatorApplication {
-  id: string
-  name: string
-  creatorName: string
-  email: string
-  contentType: string
-  status: "pending_review" | "under_review" | "approved" | "rejected"
-  submissionDate: string
-  documentsComplete: boolean
-  vedo_id?: string
-  first_name: string
-  last_name: string
-  verification_status: string
-  verification_level: string
-  created_at: string
-  content_type: string
-  primary_platform: string
-  updated_at: string
-  website_url?: string
-  twitter_url?: string
-  linkedin_url?: string
-  content_submissions?: any[]
-}
-
-export interface MockSystemStats {
-  totalCreators: number
-  pendingApplications: number
-  verifiedContent: number
-  flaggedContent: number
-  monthlyRegistrations: number
-  activeCreators: number
-}
-
-export interface MockActivity {
-  id: string
-  description: string
-  timestamp: string
-  status: "completed" | "pending"
-}
-
-// Mock users
-export const mockUsers: MockUser[] = [
+export const mockUsers = [
   {
-    id: "admin-1",
+    id: "admin-001",
     email: "admin@vedo.gov.sl",
     password: "admin123",
     role: "admin",
-  },
-  {
-    id: "creator-1",
-    email: "sarah@techsarah.com",
-    password: "sarah123",
-    role: "creator",
-    firstName: "Sarah",
-    lastName: "Kamara",
-    creatorName: "TechSarah",
+    name: "Admin User",
     verified: true,
   },
   {
-    id: "creator-2",
+    id: "creator-001",
+    email: "sarah@techsarah.com",
+    password: "sarah123",
+    role: "creator",
+    name: "Sarah Kamara",
+    creatorName: "TechSarah",
+    verified: true,
+    vedoId: "VEDO-2023-125",
+  },
+  {
+    id: "creator-002",
     email: "mohamed@slblogger.com",
     password: "mohamed123",
     role: "creator",
-    firstName: "Mohamed",
-    lastName: "Sesay",
-    creatorName: "SL Blogger",
+    name: "Mohamed Sesay",
+    creatorName: "SLBlogger",
     verified: false,
+    vedoId: "VEDO-2024-001",
   },
   {
-    id: "moderator-1",
+    id: "moderator-001",
     email: "moderator@vedo.gov.sl",
     password: "moderator123",
     role: "moderator",
+    name: "Moderator User",
+    verified: true,
   },
 ]
 
-// Mock creator applications
-export const mockApplications: MockCreatorApplication[] = [
-  {
-    id: "VEDO-2024-001",
-    name: "John Doe",
-    creatorName: "JohnTech SL",
-    email: "john@johntech.sl",
-    contentType: "Technology Blog",
-    status: "pending_review",
-    submissionDate: "2024-01-15",
-    documentsComplete: true,
-    first_name: "John",
-    last_name: "Doe",
-    verification_status: "pending",
-    verification_level: "bronze",
-    created_at: "2024-01-15T10:00:00Z",
-    content_type: "blog",
-    primary_platform: "website",
-    updated_at: "2024-01-15T10:00:00Z",
-    website_url: "https://johntech.sl",
-    content_submissions: [],
-  },
-  {
-    id: "VEDO-2024-002",
-    name: "Fatima Bangura",
-    creatorName: "Fatima Creates",
-    email: "fatima@creates.sl",
-    contentType: "Digital Art",
-    status: "under_review",
-    submissionDate: "2024-01-12",
-    documentsComplete: false,
-    first_name: "Fatima",
-    last_name: "Bangura",
-    verification_status: "under_review",
-    verification_level: "bronze",
-    created_at: "2024-01-12T14:30:00Z",
-    content_type: "art",
-    primary_platform: "instagram",
-    updated_at: "2024-01-16T09:15:00Z",
-    website_url: "https://fatimaart.com",
-    content_submissions: [],
-  },
-]
-
-// Mock verified creators for search
-export const mockVerifiedCreators: MockCreatorApplication[] = [
+export const mockVerifiedCreators = [
   {
     id: "VEDO-2023-125",
     name: "Sarah Kamara",
     creatorName: "TechSarah",
     email: "sarah@techsarah.com",
-    contentType: "Technology Content",
-    status: "approved",
-    submissionDate: "2023-08-15",
-    documentsComplete: true,
-    vedo_id: "VEDO-2023-125",
-    first_name: "Sarah",
-    last_name: "Kamara",
-    verification_status: "verified",
-    verification_level: "gold",
-    created_at: "2023-08-15T10:00:00Z",
-    content_type: "Technology Blog & Videos",
-    primary_platform: "YouTube",
-    updated_at: "2024-01-10T15:30:00Z",
-    website_url: "https://techsarah.com",
-    twitter_url: "@techsarah_sl",
-    linkedin_url: "linkedin.com/in/sarahkamara",
-    content_submissions: [
-      { title: "AI in Sierra Leone", verified: true },
-      { title: "Tech Education Series", verified: true },
-      { title: "Digital Innovation Guide", verified: true },
-    ],
+    contentType: "Technology Blog",
+    verificationDate: "2023-12-15",
+    status: "verified",
+    verificationLevel: "Gold",
+    platforms: ["Personal Blog", "Medium", "YouTube"],
+    totalContent: 156,
+    totalViews: 45230,
+    totalEngagement: 3420,
+    monthlyEarnings: 2500,
+  },
+  {
+    id: "VEDO-2023-089",
+    name: "Ibrahim Koroma",
+    creatorName: "SierraVlogger",
+    email: "ibrahim@sierravlogger.com",
+    contentType: "Travel & Culture Vlog",
+    verificationDate: "2023-11-20",
+    status: "verified",
+    verificationLevel: "Silver",
+    platforms: ["YouTube", "Instagram", "TikTok"],
+    totalContent: 89,
+    totalViews: 32100,
+    totalEngagement: 2890,
+    monthlyEarnings: 1800,
   },
 ]
 
-// Mock system stats
-export const mockStats: MockSystemStats = {
-  totalCreators: 156,
-  pendingApplications: 12,
-  verifiedContent: 1247,
-  flaggedContent: 3,
-  monthlyRegistrations: 23,
-  activeCreators: 89,
+export const mockPendingApplications = [
+  {
+    id: "VEDO-2024-001247",
+    name: "Aminata Bangura",
+    creatorName: "AmiCreates",
+    email: "aminata@amicreates.com",
+    contentType: "Fashion & Lifestyle",
+    submissionDate: "2024-01-20",
+    status: "pending_review",
+    documentsComplete: true,
+    platforms: ["Instagram", "TikTok"],
+  },
+  {
+    id: "VEDO-2024-001248",
+    name: "Joseph Mansaray",
+    creatorName: "JoeTech",
+    email: "joseph@joetech.sl",
+    contentType: "Technology Reviews",
+    submissionDate: "2024-01-18",
+    status: "under_review",
+    documentsComplete: false,
+    platforms: ["YouTube", "Personal Blog"],
+  },
+  {
+    id: "VEDO-2024-001249",
+    name: "Fatima Conteh",
+    creatorName: "FatimaFoodie",
+    email: "fatima@fatimafoodie.com",
+    contentType: "Food & Cooking",
+    submissionDate: "2024-01-15",
+    status: "pending_review",
+    documentsComplete: true,
+    platforms: ["YouTube", "Instagram", "Facebook"],
+  },
+]
+
+export const mockSystemStats = {
+  totalCreators: 1247,
+  pendingApplications: 23,
+  verifiedContent: 8934,
+  flaggedContent: 12,
+  monthlyRegistrations: 156,
+  activeCreators: 892,
 }
 
-// Mock recent activity
-export const mockRecentActivity: MockActivity[] = [
+export const mockRecentActivity = [
   {
-    id: "act-1",
-    description: "Creator application approved: John Doe (JohnTech SL)",
-    timestamp: "2024-01-16T09:30:00Z",
+    id: "activity-001",
+    description: "New creator application submitted by Aminata Bangura",
+    timestamp: "2024-01-20T10:30:00Z",
     status: "completed",
+    type: "application",
   },
   {
-    id: "act-2",
-    description: "New content submitted for verification by Sarah Kamara",
-    timestamp: "2024-01-16T08:15:00Z",
-    status: "pending",
+    id: "activity-002",
+    description: "Content verification completed for TechSarah",
+    timestamp: "2024-01-20T09:15:00Z",
+    status: "completed",
+    type: "verification",
   },
   {
-    id: "act-3",
-    description: "System backup completed successfully",
-    timestamp: "2024-01-16T02:00:00Z",
-    status: "completed",
+    id: "activity-003",
+    description: "System backup initiated",
+    timestamp: "2024-01-20T08:00:00Z",
+    status: "in_progress",
+    type: "system",
   },
   {
-    id: "act-4",
-    description: "New creator registration: Fatima Bangura",
-    timestamp: "2024-01-15T16:45:00Z",
+    id: "activity-004",
+    description: "Monthly analytics report generated",
+    timestamp: "2024-01-19T23:30:00Z",
     status: "completed",
+    type: "report",
   },
 ]
 
 // Mock authentication functions
 export const mockAuth = {
-  currentUser: null as MockUser | null,
-
-  signIn: async (email: string, password: string): Promise<MockUser> => {
-    const user = mockUsers.find((u) => u.email === email && u.password === password)
-    if (!user) {
-      throw new Error("Invalid email or password")
-    }
-    mockAuth.currentUser = user
+  async login(email: string, password: string) {
     // Simulate API delay
     await new Promise((resolve) => setTimeout(resolve, 1000))
-    return user
+
+    const user = mockUsers.find((u) => u.email === email && u.password === password)
+    if (user) {
+      localStorage.setItem("mockUser", JSON.stringify(user))
+      return { success: true, user, error: null }
+    }
+    return { success: false, user: null, error: "Invalid credentials" }
   },
 
-  signOut: async (): Promise<void> => {
-    mockAuth.currentUser = null
-    await new Promise((resolve) => setTimeout(resolve, 500))
-  },
-
-  register: async (formData: any): Promise<{ success: boolean; message: string; vedoId?: string }> => {
+  async register(userData: any) {
     // Simulate API delay
     await new Promise((resolve) => setTimeout(resolve, 2000))
 
-    // Generate mock VEDO ID
-    const vedoId = `VEDO-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 1000)).padStart(3, "0")}`
-
-    // Add to applications (simulate pending registration)
-    const newApplication: MockCreatorApplication = {
-      id: vedoId,
-      name: `${formData.personalInfo.firstName} ${formData.personalInfo.lastName}`,
-      creatorName: formData.creatorInfo.creatorName,
-      email: formData.personalInfo.email,
-      contentType: formData.creatorInfo.contentType,
-      status: "pending_review",
-      submissionDate: new Date().toISOString().split("T")[0],
-      documentsComplete: true,
-      vedo_id: vedoId,
-      first_name: formData.personalInfo.firstName,
-      last_name: formData.personalInfo.lastName,
-      verification_status: "pending",
-      verification_level: "bronze",
-      created_at: new Date().toISOString(),
-      content_type: formData.creatorInfo.contentType,
-      primary_platform: formData.creatorInfo.primaryPlatform,
-      updated_at: new Date().toISOString(),
-      website_url: formData.creatorInfo.websiteUrl,
-      content_submissions: [],
-    }
-
-    mockApplications.push(newApplication)
+    const vedoId = `VEDO-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 999999)).padStart(6, "0")}`
 
     return {
       success: true,
-      message: "Registration submitted successfully! You will receive a confirmation email within 24 hours.",
       vedoId,
+      message: "Registration submitted successfully",
     }
   },
 
-  searchCreator: async (query: string): Promise<MockCreatorApplication | null> => {
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+  getCurrentUser() {
+    const userStr = localStorage.getItem("mockUser")
+    return userStr ? JSON.parse(userStr) : null
+  },
 
-    const creator = mockVerifiedCreators.find(
-      (c) =>
-        c.name.toLowerCase().includes(query.toLowerCase()) ||
-        c.creatorName.toLowerCase().includes(query.toLowerCase()) ||
-        c.email.toLowerCase().includes(query.toLowerCase()) ||
-        c.vedo_id?.toLowerCase().includes(query.toLowerCase()) ||
-        c.website_url?.toLowerCase().includes(query.toLowerCase()),
-    )
-
-    return creator || null
+  logout() {
+    localStorage.removeItem("mockUser")
   },
 }
 
 // Mock admin functions
 export const mockAdmin = {
-  getSystemStats: async (): Promise<MockSystemStats> => {
-    await new Promise((resolve) => setTimeout(resolve, 800))
-    return mockStats
+  async getSystemStats() {
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    return mockSystemStats
   },
 
-  getPendingApplications: async (): Promise<MockCreatorApplication[]> => {
-    await new Promise((resolve) => setTimeout(resolve, 600))
-    return mockApplications.filter((app) => app.status === "pending_review" || app.status === "under_review")
+  async getPendingApplications() {
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    return mockPendingApplications
   },
 
-  getRecentActivity: async (): Promise<MockActivity[]> => {
+  async getRecentActivity() {
     await new Promise((resolve) => setTimeout(resolve, 500))
     return mockRecentActivity
   },
 
-  approveApplication: async (creatorId: string, adminId: string): Promise<{ success: boolean; message: string }> => {
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-
-    const application = mockApplications.find((app) => app.id === creatorId)
-    if (application) {
-      application.status = "approved"
-      application.verification_status = "verified"
-      application.updated_at = new Date().toISOString()
-
-      // Add to verified creators
-      mockVerifiedCreators.push(application)
-
-      // Add activity
-      mockRecentActivity.unshift({
-        id: `act-${Date.now()}`,
-        description: `Creator application approved: ${application.name} (${application.creatorName})`,
-        timestamp: new Date().toISOString(),
-        status: "completed",
-      })
-
-      return { success: true, message: "Application approved successfully" }
-    }
-
-    return { success: false, message: "Application not found" }
+  async approveApplication(creatorId: string, adminId: string) {
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    return { success: true, message: "Application approved successfully" }
   },
 }
 
-// Mock system initialization
-export const mockSystem = {
-  getSystemStatus: async (): Promise<{ initialized: boolean; demoUsersCount: number; error?: string }> => {
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    return {
-      initialized: true,
-      demoUsersCount: mockUsers.length,
-    }
-  },
+// Mock verification function
+export const mockVerification = {
+  async searchCreator(query: string) {
+    await new Promise((resolve) => setTimeout(resolve, 800))
 
-  initializeSystem: async (): Promise<{ success: boolean; message: string }> => {
-    await new Promise((resolve) => setTimeout(resolve, 3000))
-    return {
-      success: true,
-      message: "System initialized successfully with demo users and sample data!",
-    }
+    const creator = mockVerifiedCreators.find(
+      (c) =>
+        c.id.toLowerCase().includes(query.toLowerCase()) ||
+        c.name.toLowerCase().includes(query.toLowerCase()) ||
+        c.creatorName.toLowerCase().includes(query.toLowerCase()),
+    )
+
+    return creator || null
   },
 }
