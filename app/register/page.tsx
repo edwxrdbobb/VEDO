@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -10,10 +11,9 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Shield, Upload, User, Globe, FileText } from "lucide-react"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Shield, Upload, User, Globe, FileText, CheckCircle } from "lucide-react"
 import Link from "next/link"
-import { submitCreatorRegistration } from "@/actions/creator-registration"
-import { useActionState } from "react"
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -41,27 +41,70 @@ export default function RegisterPage() {
       },
     },
     verification: {
-      idDocument: null,
-      portfolioSamples: [],
       agreesToTerms: false,
       agreesToIPPolicy: false,
     },
   })
 
-  const [state, action, isPending] = useActionState(submitCreatorRegistration, null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitResult, setSubmitResult] = useState<{ success: boolean; message: string; vedoId?: string } | null>(null)
+  const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (!formData.verification.agreesToTerms || !formData.verification.agreesToIPPolicy) {
+      setSubmitResult({
+        success: false,
+        message: "Please agree to the Terms of Service and IP Policy to continue.",
+      })
       return
     }
 
-    // The form data will be automatically passed to the server action
-    const formDataToSubmit = new FormData()
-    formDataToSubmit.append("data", JSON.stringify(formData))
+    setIsSubmitting(true)
 
-    action(formData)
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 2000))
+
+    // Generate mock VEDO ID
+    const vedoId = `VEDO-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 999999)).padStart(6, "0")}`
+
+    setSubmitResult({
+      success: true,
+      message: `Registration submitted successfully! Your application is now under review. You will receive an email notification once approved.`,
+      vedoId: vedoId,
+    })
+
+    setIsSubmitting(false)
+
+    // Redirect to login after 3 seconds
+    setTimeout(() => {
+      router.push("/login")
+    }, 3000)
+  }
+
+  if (submitResult?.success) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
+        <div className="max-w-md w-full">
+          <Card className="text-center">
+            <CardContent className="pt-6">
+              <CheckCircle className="h-16 w-16 text-green-600 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Registration Successful!</h2>
+              <p className="text-gray-600 mb-4">{submitResult.message}</p>
+              {submitResult.vedoId && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                  <p className="text-sm text-blue-800">
+                    Your VEDO ID: <span className="font-mono font-bold">{submitResult.vedoId}</span>
+                  </p>
+                </div>
+              )}
+              <p className="text-sm text-gray-500">Redirecting to login page...</p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -445,28 +488,24 @@ export default function RegisterPage() {
 
           {/* Submit Button */}
           <div className="flex gap-4">
-            <Button type="button" variant="outline" asChild className="flex-1">
+            <Button type="button" variant="outline" asChild className="flex-1 bg-transparent">
               <Link href="/">Cancel</Link>
             </Button>
             <Button
               type="submit"
               className="flex-1"
-              disabled={!formData.verification.agreesToTerms || !formData.verification.agreesToIPPolicy || isPending}
+              disabled={!formData.verification.agreesToTerms || !formData.verification.agreesToIPPolicy || isSubmitting}
             >
-              {isPending ? "Submitting Registration..." : "Submit Registration"}
+              {isSubmitting ? "Submitting Registration..." : "Submit Registration"}
             </Button>
           </div>
         </form>
-        {state && (
-          <div
-            className={`p-4 rounded-lg ${state.success ? "bg-green-50 border border-green-200" : "bg-red-50 border border-red-200"}`}
-          >
-            <p className={`${state.success ? "text-green-800" : "text-red-800"}`}>{state.message}</p>
-            {state.success && state.vedoId && (
-              <p className="text-sm text-green-700 mt-2">
-                Your VEDO ID: <span className="font-mono font-bold">{state.vedoId}</span>
-              </p>
-            )}
+
+        {submitResult && !submitResult.success && (
+          <div className="mt-4 p-4 rounded-lg bg-red-50 border border-red-200">
+            <Alert variant="destructive">
+              <AlertDescription>{submitResult.message}</AlertDescription>
+            </Alert>
           </div>
         )}
       </div>

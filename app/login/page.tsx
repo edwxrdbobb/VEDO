@@ -11,7 +11,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Shield, Eye, EyeOff } from "lucide-react"
-import { signIn } from "@/lib/auth"
+import { signIn, storeUserSession } from "@/lib/auth"
+import { useAuth } from "@/components/auth-provider"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -20,6 +21,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
+  const { setUser } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -27,12 +29,43 @@ export default function LoginPage() {
     setError("")
 
     try {
-      await signIn(email, password)
-      router.push("/dashboard")
+      const result = await signIn(email, password)
+
+      // Store user session
+      storeUserSession(result.user, true) // Remember user
+
+      // Update auth context
+      setUser(result.user)
+
+      // Redirect based on role
+      if (result.user.role === "admin") {
+        router.push("/admin")
+      } else {
+        router.push("/dashboard")
+      }
     } catch (err: any) {
       setError(err.message || "Login failed. Please check your credentials.")
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handleDemoLogin = async (demoEmail: string) => {
+    setEmail(demoEmail)
+    setPassword("password123")
+
+    try {
+      const result = await signIn(demoEmail, "password123")
+      storeUserSession(result.user, true)
+      setUser(result.user)
+
+      if (result.user.role === "admin") {
+        router.push("/admin")
+      } else {
+        router.push("/dashboard")
+      }
+    } catch (err: any) {
+      setError(err.message || "Demo login failed.")
     }
   }
 
@@ -123,23 +156,50 @@ export default function LoginPage() {
         {/* Demo Accounts */}
         <Card className="bg-blue-50 border-blue-200">
           <CardHeader>
-            <CardTitle className="text-sm">Demo Accounts</CardTitle>
+            <CardTitle className="text-sm">Demo Accounts (Click to Login)</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            <div className="text-xs space-y-1">
-              <div>
-                <strong>Admin:</strong> admin@vedo.gov.sl / admin123
-              </div>
-              <div>
-                <strong>Creator (Verified):</strong> sarah@techsarah.com / sarah123
-              </div>
-              <div>
-                <strong>Creator (Pending):</strong> mohamed@slblogger.com / mohamed123
-              </div>
-              <div>
-                <strong>Moderator:</strong> moderator@vedo.gov.sl / moderator123
-              </div>
+            <div className="space-y-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full justify-start text-xs bg-transparent"
+                onClick={() => handleDemoLogin("admin@vedo.gov.sl")}
+                disabled={isLoading}
+              >
+                <strong>Admin:</strong> admin@vedo.gov.sl
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full justify-start text-xs bg-transparent"
+                onClick={() => handleDemoLogin("sarah@techsarah.com")}
+                disabled={isLoading}
+              >
+                <strong>Creator (Verified):</strong> sarah@techsarah.com
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full justify-start text-xs bg-transparent"
+                onClick={() => handleDemoLogin("mohamed@slblogger.com")}
+                disabled={isLoading}
+              >
+                <strong>Creator (Pending):</strong> mohamed@slblogger.com
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full justify-start text-xs bg-transparent"
+                onClick={() => handleDemoLogin("moderator@vedo.gov.sl")}
+                disabled={isLoading}
+              >
+                <strong>Moderator:</strong> moderator@vedo.gov.sl
+              </Button>
             </div>
+            <p className="text-xs text-gray-600 mt-2">
+              All demo accounts use password: <code className="bg-gray-200 px-1 rounded">password123</code>
+            </p>
           </CardContent>
         </Card>
       </div>

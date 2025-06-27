@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -19,14 +19,19 @@ import {
   AlertCircle,
   CheckCircle,
 } from "lucide-react"
-import { ProtectedRoute } from "@/components/protected-route"
+import { useAuth } from "@/components/auth-provider"
+import { useRouter } from "next/navigation"
 
 export default function DashboardPage() {
+  const { user, loading } = useAuth()
+  const router = useRouter()
+
+  // Mock creator data based on logged in user
   const [creator] = useState({
     id: "VEDO-2024-001247",
-    name: "Sarah Kamara",
-    creatorName: "TechSarah",
-    email: "sarah@techsarah.com",
+    name: user?.name || "Content Creator",
+    creatorName: user?.email?.includes("sarah") ? "TechSarah" : "Creator",
+    email: user?.email || "",
     status: "verified",
     joinDate: "2024-01-15",
     contentType: "Technology Blog",
@@ -67,265 +72,317 @@ export default function DashboardPage() {
     },
   ]
 
-  return (
-    <ProtectedRoute requiredRole="creator">
-      <div className="min-h-screen bg-gray-50">
-        {/* Header */}
-        <header className="bg-white border-b">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <Shield className="h-6 w-6 text-blue-600" />
-                  <span className="font-bold">VEDO Dashboard</span>
-                </div>
-                <Badge variant="secondary" className="bg-green-100 text-green-800">
-                  <CheckCircle className="h-3 w-3 mr-1" />
-                  Verified Creator
-                </Badge>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600">ID: {creator.id}</span>
-                <Button variant="outline" size="sm">
-                  <User className="h-4 w-4 mr-1" />
-                  Profile
-                </Button>
-              </div>
-            </div>
-          </div>
-        </header>
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login")
+    }
+  }, [user, loading, router])
 
-        <div className="container mx-auto px-4 py-8">
-          {/* Welcome Section */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, {creator.name}!</h1>
-            <p className="text-gray-600">
-              Manage your content, track performance, and maintain your verification status.
-            </p>
-          </div>
-
-          {/* Stats Overview */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600">Total Content</p>
-                    <p className="text-2xl font-bold">{creator.totalContent}</p>
-                  </div>
-                  <FileText className="h-8 w-8 text-blue-600" />
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600">Total Views</p>
-                    <p className="text-2xl font-bold">{creator.totalViews.toLocaleString()}</p>
-                  </div>
-                  <Eye className="h-8 w-8 text-green-600" />
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600">Engagement</p>
-                    <p className="text-2xl font-bold">{creator.totalEngagement}</p>
-                  </div>
-                  <Heart className="h-8 w-8 text-red-600" />
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600">Monthly Earnings</p>
-                    <p className="text-2xl font-bold">Le {creator.monthlyEarnings.toLocaleString()}</p>
-                  </div>
-                  <DollarSign className="h-8 w-8 text-purple-600" />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Tabs defaultValue="overview" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="content">Content</TabsTrigger>
-              <TabsTrigger value="analytics">Analytics</TabsTrigger>
-              <TabsTrigger value="verification">Verification</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="overview" className="space-y-6">
-              <div className="grid lg:grid-cols-2 gap-6">
-                {/* Profile Summary */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Profile Summary</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center gap-4">
-                      <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-                        <User className="h-8 w-8 text-blue-600" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold">{creator.creatorName}</h3>
-                        <p className="text-sm text-gray-600">{creator.contentType}</p>
-                        <Badge variant="outline" className="mt-1">
-                          <Award className="h-3 w-3 mr-1" />
-                          {creator.verificationLevel} Verified
-                        </Badge>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>Profile Completion</span>
-                        <span>95%</span>
-                      </div>
-                      <Progress value={95} className="h-2" />
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Quick Actions */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Quick Actions</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <Button className="w-full justify-start">
-                      <FileText className="h-4 w-4 mr-2" />
-                      Submit New Content
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start">
-                      <TrendingUp className="h-4 w-4 mr-2" />
-                      View Analytics
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start">
-                      <Shield className="h-4 w-4 mr-2" />
-                      Update Verification
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start">
-                      <Globe className="h-4 w-4 mr-2" />
-                      Share Profile
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Recent Activity */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Recent Activity</CardTitle>
-                  <CardDescription>Your latest content submissions and updates</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {recentContent.map((content) => (
-                      <div key={content.id} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex-1">
-                          <h4 className="font-medium">{content.title}</h4>
-                          <div className="flex items-center gap-4 mt-1 text-sm text-gray-600">
-                            <span>{content.platform}</span>
-                            <span>{content.publishDate}</span>
-                            <Badge
-                              variant={content.status === "verified" ? "default" : "secondary"}
-                              className={content.status === "verified" ? "bg-green-100 text-green-800" : ""}
-                            >
-                              {content.status}
-                            </Badge>
-                          </div>
-                        </div>
-                        <div className="text-right text-sm">
-                          <div className="flex items-center gap-1 text-gray-600">
-                            <Eye className="h-3 w-3" />
-                            {content.views}
-                          </div>
-                          <div className="flex items-center gap-1 text-gray-600">
-                            <Heart className="h-3 w-3" />
-                            {content.engagement}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="content">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Content Management</CardTitle>
-                  <CardDescription>Manage and track all your submitted content</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600">Content management interface would be implemented here...</p>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="analytics">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Performance Analytics</CardTitle>
-                  <CardDescription>Detailed insights into your content performance</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-600">Analytics dashboard would be implemented here...</p>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="verification">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Verification Status</CardTitle>
-                  <CardDescription>Manage your verification documents and status</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 border rounded-lg bg-green-50">
-                      <div className="flex items-center gap-3">
-                        <CheckCircle className="h-5 w-5 text-green-600" />
-                        <div>
-                          <p className="font-medium">Identity Verification</p>
-                          <p className="text-sm text-gray-600">Completed on Jan 15, 2024</p>
-                        </div>
-                      </div>
-                      <Badge className="bg-green-100 text-green-800">Verified</Badge>
-                    </div>
-                    <div className="flex items-center justify-between p-4 border rounded-lg bg-green-50">
-                      <div className="flex items-center gap-3">
-                        <CheckCircle className="h-5 w-5 text-green-600" />
-                        <div>
-                          <p className="font-medium">Content Portfolio</p>
-                          <p className="text-sm text-gray-600">Last updated Jan 20, 2024</p>
-                        </div>
-                      </div>
-                      <Badge className="bg-green-100 text-green-800">Approved</Badge>
-                    </div>
-                    <div className="flex items-center justify-between p-4 border rounded-lg bg-yellow-50">
-                      <div className="flex items-center gap-3">
-                        <AlertCircle className="h-5 w-5 text-yellow-600" />
-                        <div>
-                          <p className="font-medium">Annual Review</p>
-                          <p className="text-sm text-gray-600">Due in 11 months</p>
-                        </div>
-                      </div>
-                      <Badge variant="secondary">Upcoming</Badge>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Shield className="h-8 w-8 text-blue-600 mx-auto mb-4 animate-spin" />
+          <p>Loading...</p>
         </div>
       </div>
-    </ProtectedRoute>
+    )
+  }
+
+  if (!user) {
+    return null
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white border-b">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Shield className="h-6 w-6 text-blue-600" />
+                <span className="font-bold">VEDO Dashboard</span>
+              </div>
+              <Badge variant="secondary" className="bg-green-100 text-green-800">
+                <CheckCircle className="h-3 w-3 mr-1" />
+                Verified Creator
+              </Badge>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">ID: {creator.id}</span>
+              <Button variant="outline" size="sm">
+                <User className="h-4 w-4 mr-1" />
+                Profile
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  localStorage.removeItem("vedo_user")
+                  sessionStorage.removeItem("vedo_user")
+                  router.push("/login")
+                }}
+              >
+                Sign Out
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="container mx-auto px-4 py-8">
+        {/* Welcome Section */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, {creator.name}!</h1>
+          <p className="text-gray-600">
+            Manage your content, track performance, and maintain your verification status.
+          </p>
+        </div>
+
+        {/* Stats Overview */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Total Content</p>
+                  <p className="text-2xl font-bold">{creator.totalContent}</p>
+                </div>
+                <FileText className="h-8 w-8 text-blue-600" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Total Views</p>
+                  <p className="text-2xl font-bold">{creator.totalViews.toLocaleString()}</p>
+                </div>
+                <Eye className="h-8 w-8 text-green-600" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Engagement</p>
+                  <p className="text-2xl font-bold">{creator.totalEngagement}</p>
+                </div>
+                <Heart className="h-8 w-8 text-red-600" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Monthly Earnings</p>
+                  <p className="text-2xl font-bold">Le {creator.monthlyEarnings.toLocaleString()}</p>
+                </div>
+                <DollarSign className="h-8 w-8 text-purple-600" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="content">Content</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="verification">Verification</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid lg:grid-cols-2 gap-6">
+              {/* Profile Summary */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Profile Summary</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                      <User className="h-8 w-8 text-blue-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">{creator.creatorName}</h3>
+                      <p className="text-sm text-gray-600">{creator.contentType}</p>
+                      <Badge variant="outline" className="mt-1">
+                        <Award className="h-3 w-3 mr-1" />
+                        {creator.verificationLevel} Verified
+                      </Badge>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Profile Completion</span>
+                      <span>95%</span>
+                    </div>
+                    <Progress value={95} className="h-2" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Quick Actions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button className="w-full justify-start">
+                    <FileText className="h-4 w-4 mr-2" />
+                    Submit New Content
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start bg-transparent">
+                    <TrendingUp className="h-4 w-4 mr-2" />
+                    View Analytics
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start bg-transparent">
+                    <Shield className="h-4 w-4 mr-2" />
+                    Update Verification
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start bg-transparent">
+                    <Globe className="h-4 w-4 mr-2" />
+                    Share Profile
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Recent Activity */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Activity</CardTitle>
+                <CardDescription>Your latest content submissions and updates</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {recentContent.map((content) => (
+                    <div key={content.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex-1">
+                        <h4 className="font-medium">{content.title}</h4>
+                        <div className="flex items-center gap-4 mt-1 text-sm text-gray-600">
+                          <span>{content.platform}</span>
+                          <span>{content.publishDate}</span>
+                          <Badge
+                            variant={content.status === "verified" ? "default" : "secondary"}
+                            className={content.status === "verified" ? "bg-green-100 text-green-800" : ""}
+                          >
+                            {content.status}
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="text-right text-sm">
+                        <div className="flex items-center gap-1 text-gray-600">
+                          <Eye className="h-3 w-3" />
+                          {content.views}
+                        </div>
+                        <div className="flex items-center gap-1 text-gray-600">
+                          <Heart className="h-3 w-3" />
+                          {content.engagement}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="content">
+            <Card>
+              <CardHeader>
+                <CardTitle>Content Management</CardTitle>
+                <CardDescription>Manage and track all your submitted content</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Content Management</h3>
+                  <p className="text-gray-600 mb-4">
+                    This section would contain tools to manage your content submissions, track verification status, and
+                    update content details.
+                  </p>
+                  <Button>
+                    <FileText className="h-4 w-4 mr-2" />
+                    Submit New Content
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="analytics">
+            <Card>
+              <CardHeader>
+                <CardTitle>Performance Analytics</CardTitle>
+                <CardDescription>Detailed insights into your content performance</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <TrendingUp className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Analytics Dashboard</h3>
+                  <p className="text-gray-600 mb-4">
+                    This section would contain detailed analytics about your content performance, audience engagement,
+                    and revenue insights.
+                  </p>
+                  <Button>
+                    <TrendingUp className="h-4 w-4 mr-2" />
+                    View Detailed Analytics
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="verification">
+            <Card>
+              <CardHeader>
+                <CardTitle>Verification Status</CardTitle>
+                <CardDescription>Manage your verification documents and status</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 border rounded-lg bg-green-50">
+                    <div className="flex items-center gap-3">
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                      <div>
+                        <p className="font-medium">Identity Verification</p>
+                        <p className="text-sm text-gray-600">Completed on Jan 15, 2024</p>
+                      </div>
+                    </div>
+                    <Badge className="bg-green-100 text-green-800">Verified</Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-4 border rounded-lg bg-green-50">
+                    <div className="flex items-center gap-3">
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                      <div>
+                        <p className="font-medium">Content Portfolio</p>
+                        <p className="text-sm text-gray-600">Last updated Jan 20, 2024</p>
+                      </div>
+                    </div>
+                    <Badge className="bg-green-100 text-green-800">Approved</Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-4 border rounded-lg bg-yellow-50">
+                    <div className="flex items-center gap-3">
+                      <AlertCircle className="h-5 w-5 text-yellow-600" />
+                      <div>
+                        <p className="font-medium">Annual Review</p>
+                        <p className="text-sm text-gray-600">Due in 11 months</p>
+                      </div>
+                    </div>
+                    <Badge variant="secondary">Upcoming</Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
   )
 }

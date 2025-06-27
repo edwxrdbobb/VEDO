@@ -10,11 +10,55 @@ import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Shield, Search, CheckCircle, AlertCircle, Globe, Calendar, Award } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { searchCreator } from "@/actions/creator-registration"
+
+// Mock creators database
+const mockCreators = [
+  {
+    vedo_id: "VEDO-2024-001247",
+    first_name: "Sarah",
+    last_name: "Kamara",
+    creator_name: "TechSarah",
+    email: "sarah@techsarah.com",
+    verification_status: "verified",
+    verification_level: "gold",
+    created_at: "2024-01-15T10:30:00Z",
+    updated_at: "2024-01-20T14:30:00Z",
+    content_type: "Technology Blog",
+    primary_platform: "Personal Website",
+    website_url: "https://techsarah.com",
+    twitter_url: "https://twitter.com/techsarah_sl",
+    linkedin_url: "https://linkedin.com/in/sarah-kamara",
+    content_submissions: [
+      { id: 1, title: "AI in Sierra Leone", platform: "Blog" },
+      { id: 2, title: "Digital Payments Guide", platform: "Medium" },
+      { id: 3, title: "Cybersecurity Tips", platform: "YouTube" },
+    ],
+  },
+  {
+    vedo_id: "VEDO-2024-001248",
+    first_name: "Mohamed",
+    last_name: "Sesay",
+    creator_name: "SL_Blogger",
+    email: "mohamed@slblogger.com",
+    verification_status: "verified",
+    verification_level: "silver",
+    created_at: "2024-01-10T09:15:00Z",
+    updated_at: "2024-01-18T16:20:00Z",
+    content_type: "News & Politics",
+    primary_platform: "Medium",
+    website_url: "https://medium.com/@slblogger",
+    twitter_url: "https://twitter.com/sl_blogger",
+    linkedin_url: null,
+    content_submissions: [
+      { id: 1, title: "Sierra Leone Elections Analysis", platform: "Medium" },
+      { id: 2, title: "Economic Development Report", platform: "Blog" },
+    ],
+  },
+]
 
 export default function VerifyPage() {
   const [searchQuery, setSearchQuery] = useState("")
-  const [searchResult, setSearchResult] = useState(null)
+  const [searchResult, setSearchResult] = useState<any>(null)
   const [isSearching, setIsSearching] = useState(false)
   const [error, setError] = useState("")
 
@@ -23,8 +67,18 @@ export default function VerifyPage() {
     setIsSearching(true)
     setError("")
 
+    // Simulate API delay
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+
     try {
-      const result = await searchCreator(searchQuery)
+      // Search in mock database
+      const result = mockCreators.find(
+        (creator) =>
+          creator.vedo_id.toLowerCase() === searchQuery.toLowerCase() ||
+          creator.email.toLowerCase() === searchQuery.toLowerCase() ||
+          creator.creator_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (creator.website_url && creator.website_url.toLowerCase().includes(searchQuery.toLowerCase())),
+      )
 
       if (result) {
         setSearchResult({
@@ -91,6 +145,9 @@ export default function VerifyPage() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   required
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  Try: "VEDO-2024-001247", "sarah@techsarah.com", "TechSarah", or "techsarah.com"
+                </p>
               </div>
               <Button type="submit" disabled={isSearching} className="w-full">
                 {isSearching ? "Searching..." : "Verify Creator"}
@@ -185,7 +242,7 @@ export default function VerifyPage() {
                       <div>
                         <Label className="text-sm font-medium text-gray-500">Platforms</Label>
                         <div className="flex flex-wrap gap-1 mt-1">
-                          {searchResult.platforms.map((platform, index) => (
+                          {searchResult.platforms.map((platform: string, index: number) => (
                             <Badge key={index} variant="outline" className="text-xs">
                               {platform}
                             </Badge>
@@ -216,14 +273,32 @@ export default function VerifyPage() {
                       <div>
                         <Label className="text-sm font-medium text-gray-500">Social Media</Label>
                         <div className="space-y-1">
-                          <div className="flex items-center gap-2 text-sm">
-                            <span className="text-gray-400">Twitter:</span>
-                            <span>{searchResult.socialMedia.twitter}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm">
-                            <span className="text-gray-400">LinkedIn:</span>
-                            <span>{searchResult.socialMedia.linkedin}</span>
-                          </div>
+                          {searchResult.socialMedia.twitter && (
+                            <div className="flex items-center gap-2 text-sm">
+                              <span className="text-gray-400">Twitter:</span>
+                              <a
+                                href={searchResult.socialMedia.twitter}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline"
+                              >
+                                {searchResult.socialMedia.twitter}
+                              </a>
+                            </div>
+                          )}
+                          {searchResult.socialMedia.linkedin && (
+                            <div className="flex items-center gap-2 text-sm">
+                              <span className="text-gray-400">LinkedIn:</span>
+                              <a
+                                href={searchResult.socialMedia.linkedin}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline"
+                              >
+                                {searchResult.socialMedia.linkedin}
+                              </a>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
