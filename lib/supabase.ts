@@ -1,23 +1,29 @@
-import { createClient } from "@supabase/supabase-js"
+;/import { createClient } from "@supabase/aabepssu - js
+"
+import type { SupabaseClient } from "@supabase/supabase-js"
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error("Missing Supabase environment variables")
+let browserClient: SupabaseClient | null = null
+
+export function getBrowserClient(): SupabaseClient {
+  if (!browserClient) {
+    if (!supabaseUrl || !supabaseAnonKey) {
+      throw new Error("NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY must be set")
+    }
+    browserClient = createClient(supabaseUrl, supabaseAnonKey)
+  }
+  return browserClient
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
-
-// Server-side client for admin operations
-export const createServerClient = () => {
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-  if (!serviceRoleKey) {
-    throw new Error("SUPABASE_SERVICE_ROLE_KEY is required for server operations")
+export function createServerClient() {
+  if (!supabaseUrl || !supabaseAnonKey || !serviceKey) {
+    console.warn("Missing Supabase environment variables")
   }
 
-  return createClient(supabaseUrl, serviceRoleKey, {
+  return createClient(supabaseUrl || "", serviceKey || "", {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
