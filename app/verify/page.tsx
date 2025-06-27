@@ -28,7 +28,7 @@ import { ThemeToggle } from "@/components/theme-toggle"
 // Mock database of verified creators
 const verifiedCreators = [
   {
-    id: "VEDO-2024-001247",
+    id: "INFLO-2024-001247",
     name: "Sarah Kamara",
     creatorName: "TechSarah",
     email: "sarah@techsarah.com",
@@ -43,7 +43,7 @@ const verifiedCreators = [
     avatar: "/placeholder-user.jpg",
   },
   {
-    id: "VEDO-2024-001248",
+    id: "INFLO-2024-001248",
     name: "Mohamed Bangura",
     creatorName: "SL Blogger",
     email: "mohamed@slblogger.com",
@@ -58,7 +58,7 @@ const verifiedCreators = [
     avatar: "/placeholder-user.jpg",
   },
   {
-    id: "VEDO-2024-001249",
+    id: "INFLO-2024-001249",
     name: "Fatima Sesay",
     creatorName: "EduSL",
     email: "fatima@edusl.com",
@@ -106,7 +106,7 @@ export default function VerifyPage() {
     if (result) {
       setSearchResult(result)
     } else {
-      setError("Creator not found in VEDO database")
+      setError("Creator not found in INFLO database")
     }
 
     setIsSearching(false)
@@ -160,7 +160,7 @@ export default function VerifyPage() {
             <Link href="/" className="flex items-center gap-2">
               <Shield className="h-6 w-6 text-blue-600" />
               <div>
-                <span className="font-bold text-gray-900 dark:text-white">VEDO</span>
+                <span className="font-bold text-gray-900 dark:text-white">INFLO</span>
                 <p className="text-xs text-gray-600 dark:text-gray-400">Verify Creators</p>
               </div>
             </Link>
@@ -181,7 +181,7 @@ export default function VerifyPage() {
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Verify Digital Creator</h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Search for a creator to verify their VEDO status and authenticity
+              Search for a creator to verify their INFLO status and authenticity
             </p>
           </div>
 
@@ -200,7 +200,7 @@ export default function VerifyPage() {
               <form onSubmit={handleSearch} className="space-y-4">
                 <div className="flex gap-2">
                   <Input
-                    placeholder="e.g., VEDO-2024-001247 or TechSarah"
+                    placeholder="e.g., INFLO-2024-001247 or TechSarah"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="flex-1 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
@@ -216,7 +216,7 @@ export default function VerifyPage() {
                 <div className="text-sm text-gray-500 dark:text-gray-400">
                   <p className="mb-1">Try searching for:</p>
                   <div className="flex flex-wrap gap-2">
-                    {["VEDO-2024-001247", "TechSarah", "SL Blogger", "EduSL"].map((example) => (
+                    {["INFLO-2024-001247", "TechSarah", "SL Blogger", "EduSL"].map((example) => (
                       <Button
                         key={example}
                         variant="outline"
@@ -273,7 +273,7 @@ export default function VerifyPage() {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">VEDO ID</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">INFLO ID</span>
                       <span className="font-mono text-sm dark:text-white">{searchResult.id}</span>
                     </div>
                     <div className="flex items-center justify-between">
@@ -331,7 +331,7 @@ export default function VerifyPage() {
                       <h4 className="font-medium text-green-800 dark:text-green-200">Verification Certificate</h4>
                     </div>
                     <p className="text-sm text-green-700 dark:text-green-300">
-                      This creator has been officially verified by VEDO and meets all authenticity requirements. Their
+                      This creator has been officially verified by INFLO and meets all authenticity requirements. Their
                       content and identity have been validated by Sierra Leone's digital creator verification system.
                     </p>
                   </div>
@@ -355,14 +355,14 @@ export default function VerifyPage() {
           {/* Additional Info */}
           <Card className="dark:bg-gray-800 dark:border-gray-700">
             <CardHeader>
-              <CardTitle className="dark:text-white">About VEDO Verification</CardTitle>
+              <CardTitle className="dark:text-white">About INFLO Verification</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <h4 className="font-medium text-gray-900 dark:text-white mb-2">What is VEDO?</h4>
+                  <h4 className="font-medium text-gray-900 dark:text-white mb-2">What is INFLO?</h4>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    VEDO is Sierra Leone's official verification system for digital content creators, ensuring
+                    INFLO is Sierra Leone's official verification system for digital content creators, ensuring
                     authenticity and building trust in the digital space.
                   </p>
                 </div>

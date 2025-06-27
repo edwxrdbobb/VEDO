@@ -1,61 +1,48 @@
 "use client"
 
-import type React from "react"
-
-import { useState } from "react"
 import Link from "next/link"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
 import {
   Shield,
-  Search,
   Users,
-  Award,
   TrendingUp,
   CheckCircle,
-  ArrowRight,
-  QrCode,
-  Camera,
+  Star,
+  Globe,
   Smartphone,
   Moon,
   Sun,
+  QrCode,
+  ArrowRight,
+  Play,
 } from "lucide-react"
 import { QRScanner } from "@/components/qr-scanner"
 import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function HomePage() {
-  const [searchQuery, setSearchQuery] = useState("")
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (searchQuery.trim()) {
-      window.location.href = `/verify?search=${encodeURIComponent(searchQuery.trim())}`
-    }
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
       {/* Header */}
-      <header className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Shield className="h-8 w-8 text-blue-600" />
               <div>
-                <h1 className="text-xl font-bold text-gray-900 dark:text-white">VEDO</h1>
-                <p className="text-xs text-gray-600 dark:text-gray-400">Verified Digital Creators</p>
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white">INFLO</h1>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Sierra Leone Creator Registry</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
               <ThemeToggle />
               <QRScanner />
-              <Link href="/login">
-                <Button variant="outline">Sign In</Button>
+              <Link href="/verify">
+                <Button variant="outline">Verify Creator</Button>
               </Link>
-              <Link href="/register">
-                <Button>Get Verified</Button>
+              <Link href="/login">
+                <Button>Get Started</Button>
               </Link>
             </div>
           </div>
@@ -65,282 +52,333 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="py-20">
         <div className="container mx-auto px-4 text-center">
-          <Badge className="mb-4 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-            Sierra Leone's Official Creator Verification System
-          </Badge>
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
-            Verify Digital Creators
-            <span className="block text-blue-600">Build Trust Online</span>
-          </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
-            VEDO is Sierra Leone's official platform for verifying digital content creators. Ensure authenticity, build
-            trust, and support genuine local creators.
-          </p>
-
-          {/* Quick Verification Search */}
-          <div className="max-w-md mx-auto mb-8">
-            <form onSubmit={handleSearch} className="flex gap-2">
-              <Input
-                placeholder="Search creator ID or name..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1"
-              />
-              <Button type="submit" size="icon">
-                <Search className="h-4 w-4" />
-              </Button>
-            </form>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Try: "VEDO-2024-001247" or "TechSarah"</p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link href="/register">
-              <Button size="lg" className="gap-2">
-                <Shield className="h-5 w-5" />
-                Apply for Verification
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-            <Link href="/verify">
-              <Button variant="outline" size="lg" className="gap-2 bg-transparent">
-                <Search className="h-5 w-5" />
-                Verify a Creator
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* New Features Section */}
-      <section className="py-16 bg-white dark:bg-gray-900">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">New Features</h2>
-            <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              Enhanced verification tools and improved user experience
+          <div className="max-w-4xl mx-auto">
+            <Badge className="mb-4 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+              🇸🇱 Official Government Platform
+            </Badge>
+            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
+              Sierra Leone's
+              <span className="text-blue-600 block">Digital Creator Registry</span>
+            </h1>
+            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
+              INFLO is the official platform for registering, verifying, and managing digital content creators in Sierra
+              Leone. Build trust, protect intellectual property, and grow your digital presence.
             </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Card className="border-2 border-blue-200 dark:border-blue-800">
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                    <QrCode className="h-6 w-6 text-blue-600" />
-                  </div>
-                  <div>
-                    <CardTitle>QR Code Scanner</CardTitle>
-                    <CardDescription>Instant verification</CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  Scan QR codes to instantly verify creator authenticity. Perfect for events, collaborations, and quick
-                  verification checks.
-                </p>
-                <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400">
-                  <Camera className="h-4 w-4" />
-                  <span>Camera-based scanning</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-2 border-purple-200 dark:border-purple-800">
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
-                    <Moon className="h-6 w-6 text-purple-600" />
-                  </div>
-                  <div>
-                    <CardTitle>Dark Mode</CardTitle>
-                    <CardDescription>Enhanced viewing</CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  Switch between light and dark themes for comfortable viewing in any lighting condition. Automatic
-                  system theme detection included.
-                </p>
-                <div className="flex items-center gap-2 text-sm text-purple-600 dark:text-purple-400">
-                  <Sun className="h-4 w-4" />
-                  <span>System theme sync</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-2 border-green-200 dark:border-green-800">
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
-                    <Smartphone className="h-6 w-6 text-green-600" />
-                  </div>
-                  <div>
-                    <CardTitle>Mobile Optimized</CardTitle>
-                    <CardDescription>On-the-go verification</CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">
-                  Fully responsive design optimized for mobile devices. Verify creators anywhere, anytime with our
-                  mobile-first approach.
-                </p>
-                <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
-                  <CheckCircle className="h-4 w-4" />
-                  <span>Touch-friendly interface</span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Why Choose VEDO?</h2>
-            <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              The most trusted verification system for Sierra Leone's digital creators
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <Card>
-              <CardHeader>
-                <Shield className="h-12 w-12 text-blue-600 mb-4" />
-                <CardTitle>Official Verification</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 dark:text-gray-300">
-                  Government-backed verification system ensuring authenticity and credibility.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <Users className="h-12 w-12 text-green-600 mb-4" />
-                <CardTitle>Community Trust</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 dark:text-gray-300">
-                  Build trust with your audience through verified creator status.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <Award className="h-12 w-12 text-purple-600 mb-4" />
-                <CardTitle>Recognition</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 dark:text-gray-300">
-                  Get recognized for your authentic content and creative contributions.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <TrendingUp className="h-12 w-12 text-orange-600 mb-4" />
-                <CardTitle>Growth Support</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600 dark:text-gray-300">
-                  Access resources and opportunities to grow your digital presence.
-                </p>
-              </CardContent>
-            </Card>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/register">
+                <Button size="lg" className="text-lg px-8">
+                  Register as Creator
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
+              <Link href="/verify">
+                <Button size="lg" variant="outline" className="text-lg px-8 bg-transparent">
+                  <QrCode className="mr-2 h-5 w-5" />
+                  Verify Creator
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 bg-blue-600 dark:bg-blue-800 text-white">
+      <section className="py-16 bg-white/50 dark:bg-gray-800/50">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-4xl font-bold mb-2">1,247</div>
-              <div className="text-blue-100">Verified Creators</div>
+              <div className="text-3xl font-bold text-blue-600 mb-2">1,247</div>
+              <div className="text-gray-600 dark:text-gray-400">Registered Creators</div>
             </div>
             <div>
-              <div className="text-4xl font-bold mb-2">98.5%</div>
-              <div className="text-blue-100">Verification Accuracy</div>
+              <div className="text-3xl font-bold text-green-600 mb-2">892</div>
+              <div className="text-gray-600 dark:text-gray-400">Verified Profiles</div>
             </div>
             <div>
-              <div className="text-4xl font-bold mb-2">24/7</div>
-              <div className="text-blue-100">System Availability</div>
+              <div className="text-3xl font-bold text-purple-600 mb-2">15,420</div>
+              <div className="text-gray-600 dark:text-gray-400">Content Pieces</div>
             </div>
             <div>
-              <div className="text-4xl font-bold mb-2">15min</div>
-              <div className="text-blue-100">Average Verification Time</div>
+              <div className="text-3xl font-bold text-orange-600 mb-2">98.5%</div>
+              <div className="text-gray-600 dark:text-gray-400">Trust Score</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Why Choose INFLO?</h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+              The most comprehensive digital creator platform in Sierra Leone, backed by government trust and
+              cutting-edge technology.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <Card className="dark:bg-gray-800 dark:border-gray-700">
+              <CardHeader>
+                <Shield className="h-12 w-12 text-blue-600 mb-4" />
+                <CardTitle className="dark:text-white">Official Verification</CardTitle>
+                <CardDescription className="dark:text-gray-400">
+                  Government-backed verification system ensuring authenticity and trust
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    Identity verification
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    Content authenticity
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    Legal compliance
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card className="dark:bg-gray-800 dark:border-gray-700">
+              <CardHeader>
+                <Users className="h-12 w-12 text-green-600 mb-4" />
+                <CardTitle className="dark:text-white">Creator Community</CardTitle>
+                <CardDescription className="dark:text-gray-400">
+                  Connect with fellow creators and build meaningful partnerships
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    Networking opportunities
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    Collaboration tools
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    Knowledge sharing
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+
+            <Card className="dark:bg-gray-800 dark:border-gray-700">
+              <CardHeader>
+                <TrendingUp className="h-12 w-12 text-purple-600 mb-4" />
+                <CardTitle className="dark:text-white">Growth Analytics</CardTitle>
+                <CardDescription className="dark:text-gray-400">
+                  Track your content performance and audience engagement
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    Performance metrics
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    Audience insights
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    Growth recommendations
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* New Features Section */}
+      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Latest Features</h2>
+            <p className="text-xl text-blue-100 max-w-2xl mx-auto">
+              Experience the newest additions to INFLO that make creator verification faster and more convenient.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+              <CardHeader>
+                <QrCode className="h-12 w-12 text-yellow-400 mb-4" />
+                <CardTitle className="text-white">QR Code Scanner</CardTitle>
+                <CardDescription className="text-blue-100">
+                  Instantly verify creators by scanning their QR codes with your camera
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-sm text-blue-100">
+                  <li className="flex items-center gap-2">
+                    <Smartphone className="h-4 w-4 text-yellow-400" />
+                    Mobile-first design
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-yellow-400" />
+                    Instant verification
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-yellow-400" />
+                    Secure scanning
+                  </li>
+                </ul>
+                <div className="mt-4">
+                  <QRScanner />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/10 backdrop-blur-sm border-white/20">
+              <CardHeader>
+                <div className="flex items-center gap-2 mb-4">
+                  <Sun className="h-6 w-6 text-yellow-400" />
+                  <Moon className="h-6 w-6 text-blue-300" />
+                </div>
+                <CardTitle className="text-white">Dark/Light Mode</CardTitle>
+                <CardDescription className="text-blue-100">
+                  Switch between themes for comfortable viewing in any environment
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2 text-sm text-blue-100">
+                  <li className="flex items-center gap-2">
+                    <Globe className="h-4 w-4 text-yellow-400" />
+                    System theme sync
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-yellow-400" />
+                    Persistent settings
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Star className="h-4 w-4 text-yellow-400" />
+                    Enhanced accessibility
+                  </li>
+                </ul>
+                <div className="mt-4">
+                  <ThemeToggle />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="py-20 bg-white/50 dark:bg-gray-800/50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">How INFLO Works</h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+              Get verified in three simple steps and join Sierra Leone's trusted creator community.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl font-bold text-white">1</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Register</h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Create your account and provide your creator information and portfolio
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl font-bold text-white">2</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Verify</h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Submit required documents for identity and content verification
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl font-bold text-white">3</span>
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Create</h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Start creating with official verification and access to creator tools
+              </p>
             </div>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gray-50 dark:bg-gray-800">
+      <section className="py-20">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Ready to Get Verified?</h2>
-          <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
-            Join Sierra Leone's verified creator community and build trust with your audience.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/register">
-              <Button size="lg" className="gap-2">
-                <Shield className="h-5 w-5" />
-                Start Verification Process
-              </Button>
-            </Link>
-            <Link href="/verify">
-              <Button variant="outline" size="lg" className="gap-2 bg-transparent">
-                <Search className="h-5 w-5" />
-                Verify Existing Creator
-              </Button>
-            </Link>
+          <div className="max-w-2xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Ready to Join INFLO?</h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8">
+              Become part of Sierra Leone's official digital creator community and unlock new opportunities for growth
+              and collaboration.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/register">
+                <Button size="lg" className="text-lg px-8">
+                  Start Registration
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
+              <Link href="/verify">
+                <Button size="lg" variant="outline" className="text-lg px-8 bg-transparent">
+                  <Play className="mr-2 h-5 w-5" />
+                  Watch Demo
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 dark:bg-black text-white py-12">
+      <footer className="bg-gray-900 text-white py-12">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <Shield className="h-6 w-6 text-blue-400" />
-                <span className="font-bold">VEDO</span>
+                <span className="text-xl font-bold">INFLO</span>
               </div>
-              <p className="text-gray-400">Sierra Leone's official digital creator verification system.</p>
+              <p className="text-gray-400 text-sm">
+                Sierra Leone's official digital creator registry and verification platform.
+              </p>
             </div>
             <div>
-              <h3 className="font-semibold mb-4">Quick Links</h3>
-              <ul className="space-y-2 text-gray-400">
+              <h4 className="font-semibold mb-4">Platform</h4>
+              <ul className="space-y-2 text-sm text-gray-400">
                 <li>
-                  <Link href="/verify" className="hover:text-white">
-                    Verify Creator
+                  <Link href="/register" className="hover:text-white">
+                    Register
                   </Link>
                 </li>
                 <li>
-                  <Link href="/register" className="hover:text-white">
-                    Get Verified
+                  <Link href="/verify" className="hover:text-white">
+                    Verify
                   </Link>
                 </li>
                 <li>
                   <Link href="/login" className="hover:text-white">
-                    Sign In
+                    Login
                   </Link>
                 </li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold mb-4">Support</h3>
-              <ul className="space-y-2 text-gray-400">
+              <h4 className="font-semibold mb-4">Support</h4>
+              <ul className="space-y-2 text-sm text-gray-400">
                 <li>
                   <a href="#" className="hover:text-white">
                     Help Center
@@ -353,14 +391,14 @@ export default function HomePage() {
                 </li>
                 <li>
                   <a href="#" className="hover:text-white">
-                    Guidelines
+                    Documentation
                   </a>
                 </li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold mb-4">Legal</h3>
-              <ul className="space-y-2 text-gray-400">
+              <h4 className="font-semibold mb-4">Legal</h4>
+              <ul className="space-y-2 text-sm text-gray-400">
                 <li>
                   <a href="#" className="hover:text-white">
                     Privacy Policy
@@ -379,8 +417,8 @@ export default function HomePage() {
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 VEDO - Government of Sierra Leone. All rights reserved.</p>
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
+            <p>&copy; 2024 INFLO - Government of Sierra Leone. All rights reserved.</p>
           </div>
         </div>
       </footer>
