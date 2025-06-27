@@ -1,9 +1,0 @@
-scripts/01-create-database-schema.sql""-- Users table for authentication
-CREATE TABLE IF NOT EXISTS users (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash VARCHAR(255), -- Removed NOT NULL constraint
-    role VARCHAR(50) DEFAULT 'creator' CHECK (role IN ('creator', 'admin', 'moderator')),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);

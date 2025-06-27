@@ -11,8 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Shield, Eye, EyeOff } from "lucide-react"
-import { signIn, storeUserSession } from "@/lib/auth"
-import { useAuth } from "@/components/auth-provider"
+import { signIn } from "@/lib/auth"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -21,7 +20,6 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
-  const { setUser } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -29,20 +27,8 @@ export default function LoginPage() {
     setError("")
 
     try {
-      const result = await signIn(email, password)
-
-      // Store user session
-      storeUserSession(result.user, true) // Remember user
-
-      // Update auth context
-      setUser(result.user)
-
-      // Redirect based on role
-      if (result.user.role === "admin") {
-        router.push("/admin")
-      } else {
-        router.push("/dashboard")
-      }
+      await signIn(email, password)
+      router.push("/dashboard")
     } catch (err: any) {
       setError(err.message || "Login failed. Please check your credentials.")
     } finally {
@@ -142,13 +128,16 @@ export default function LoginPage() {
           <CardContent className="space-y-2">
             <div className="text-xs space-y-1">
               <div>
-                <strong>Creator:</strong> sarah@techsarah.com / password123
-              </div>
-              <div>
                 <strong>Admin:</strong> admin@vedo.gov.sl / admin123
               </div>
               <div>
-                <strong>Moderator:</strong> moderator@vedo.gov.sl / mod123
+                <strong>Creator (Verified):</strong> sarah@techsarah.com / sarah123
+              </div>
+              <div>
+                <strong>Creator (Pending):</strong> mohamed@slblogger.com / mohamed123
+              </div>
+              <div>
+                <strong>Moderator:</strong> moderator@vedo.gov.sl / moderator123
               </div>
             </div>
           </CardContent>
