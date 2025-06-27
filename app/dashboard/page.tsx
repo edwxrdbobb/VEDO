@@ -21,6 +21,8 @@ import {
 } from "lucide-react"
 import { useAuth } from "@/components/auth-provider"
 import { useRouter } from "next/navigation"
+import { QRScanner } from "@/components/qr-scanner"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 export default function DashboardPage() {
   const { user, loading } = useAuth()
@@ -80,10 +82,10 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <Shield className="h-8 w-8 text-blue-600 mx-auto mb-4 animate-spin" />
-          <p>Loading...</p>
+          <p className="dark:text-white">Loading...</p>
         </div>
       </div>
     )
@@ -94,23 +96,25 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <header className="bg-white border-b">
+      <header className="bg-white dark:bg-gray-800 border-b dark:border-gray-700">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <Shield className="h-6 w-6 text-blue-600" />
-                <span className="font-bold">VEDO Dashboard</span>
+                <span className="font-bold dark:text-white">VEDO Dashboard</span>
               </div>
-              <Badge variant="secondary" className="bg-green-100 text-green-800">
+              <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
                 <CheckCircle className="h-3 w-3 mr-1" />
                 Verified Creator
               </Badge>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">ID: {creator.id}</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">ID: {creator.id}</span>
+              <QRScanner />
+              <ThemeToggle />
               <Button variant="outline" size="sm">
                 <User className="h-4 w-4 mr-1" />
                 Profile
@@ -134,53 +138,53 @@ export default function DashboardPage() {
       <div className="container mx-auto px-4 py-8">
         {/* Welcome Section */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, {creator.name}!</h1>
-          <p className="text-gray-600">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Welcome back, {creator.name}!</h1>
+          <p className="text-gray-600 dark:text-gray-400">
             Manage your content, track performance, and maintain your verification status.
           </p>
         </div>
 
         {/* Stats Overview */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card>
+          <Card className="dark:bg-gray-800 dark:border-gray-700">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Total Content</p>
-                  <p className="text-2xl font-bold">{creator.totalContent}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Total Content</p>
+                  <p className="text-2xl font-bold dark:text-white">{creator.totalContent}</p>
                 </div>
                 <FileText className="h-8 w-8 text-blue-600" />
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="dark:bg-gray-800 dark:border-gray-700">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Total Views</p>
-                  <p className="text-2xl font-bold">{creator.totalViews.toLocaleString()}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Total Views</p>
+                  <p className="text-2xl font-bold dark:text-white">{creator.totalViews.toLocaleString()}</p>
                 </div>
                 <Eye className="h-8 w-8 text-green-600" />
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="dark:bg-gray-800 dark:border-gray-700">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Engagement</p>
-                  <p className="text-2xl font-bold">{creator.totalEngagement}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Engagement</p>
+                  <p className="text-2xl font-bold dark:text-white">{creator.totalEngagement}</p>
                 </div>
                 <Heart className="h-8 w-8 text-red-600" />
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="dark:bg-gray-800 dark:border-gray-700">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Monthly Earnings</p>
-                  <p className="text-2xl font-bold">Le {creator.monthlyEarnings.toLocaleString()}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Monthly Earnings</p>
+                  <p className="text-2xl font-bold dark:text-white">Le {creator.monthlyEarnings.toLocaleString()}</p>
                 </div>
                 <DollarSign className="h-8 w-8 text-purple-600" />
               </div>
@@ -189,28 +193,36 @@ export default function DashboardPage() {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="content">Content</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="verification">Verification</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4 dark:bg-gray-800">
+            <TabsTrigger value="overview" className="dark:data-[state=active]:bg-gray-700">
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="content" className="dark:data-[state=active]:bg-gray-700">
+              Content
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="dark:data-[state=active]:bg-gray-700">
+              Analytics
+            </TabsTrigger>
+            <TabsTrigger value="verification" className="dark:data-[state=active]:bg-gray-700">
+              Verification
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="space-y-6">
             <div className="grid lg:grid-cols-2 gap-6">
               {/* Profile Summary */}
-              <Card>
+              <Card className="dark:bg-gray-800 dark:border-gray-700">
                 <CardHeader>
-                  <CardTitle>Profile Summary</CardTitle>
+                  <CardTitle className="dark:text-white">Profile Summary</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                    <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
                       <User className="h-8 w-8 text-blue-600" />
                     </div>
                     <div>
-                      <h3 className="font-semibold">{creator.creatorName}</h3>
-                      <p className="text-sm text-gray-600">{creator.contentType}</p>
+                      <h3 className="font-semibold dark:text-white">{creator.creatorName}</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{creator.contentType}</p>
                       <Badge variant="outline" className="mt-1">
                         <Award className="h-3 w-3 mr-1" />
                         {creator.verificationLevel} Verified
@@ -219,8 +231,8 @@ export default function DashboardPage() {
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span>Profile Completion</span>
-                      <span>95%</span>
+                      <span className="dark:text-gray-400">Profile Completion</span>
+                      <span className="dark:text-gray-400">95%</span>
                     </div>
                     <Progress value={95} className="h-2" />
                   </div>
@@ -228,9 +240,9 @@ export default function DashboardPage() {
               </Card>
 
               {/* Quick Actions */}
-              <Card>
+              <Card className="dark:bg-gray-800 dark:border-gray-700">
                 <CardHeader>
-                  <CardTitle>Quick Actions</CardTitle>
+                  <CardTitle className="dark:text-white">Quick Actions</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <Button className="w-full justify-start">
@@ -254,34 +266,43 @@ export default function DashboardPage() {
             </div>
 
             {/* Recent Activity */}
-            <Card>
+            <Card className="dark:bg-gray-800 dark:border-gray-700">
               <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
-                <CardDescription>Your latest content submissions and updates</CardDescription>
+                <CardTitle className="dark:text-white">Recent Activity</CardTitle>
+                <CardDescription className="dark:text-gray-400">
+                  Your latest content submissions and updates
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {recentContent.map((content) => (
-                    <div key={content.id} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div
+                      key={content.id}
+                      className="flex items-center justify-between p-4 border dark:border-gray-700 rounded-lg"
+                    >
                       <div className="flex-1">
-                        <h4 className="font-medium">{content.title}</h4>
-                        <div className="flex items-center gap-4 mt-1 text-sm text-gray-600">
+                        <h4 className="font-medium dark:text-white">{content.title}</h4>
+                        <div className="flex items-center gap-4 mt-1 text-sm text-gray-600 dark:text-gray-400">
                           <span>{content.platform}</span>
                           <span>{content.publishDate}</span>
                           <Badge
                             variant={content.status === "verified" ? "default" : "secondary"}
-                            className={content.status === "verified" ? "bg-green-100 text-green-800" : ""}
+                            className={
+                              content.status === "verified"
+                                ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                                : ""
+                            }
                           >
                             {content.status}
                           </Badge>
                         </div>
                       </div>
                       <div className="text-right text-sm">
-                        <div className="flex items-center gap-1 text-gray-600">
+                        <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
                           <Eye className="h-3 w-3" />
                           {content.views}
                         </div>
-                        <div className="flex items-center gap-1 text-gray-600">
+                        <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
                           <Heart className="h-3 w-3" />
                           {content.engagement}
                         </div>
@@ -294,16 +315,18 @@ export default function DashboardPage() {
           </TabsContent>
 
           <TabsContent value="content">
-            <Card>
+            <Card className="dark:bg-gray-800 dark:border-gray-700">
               <CardHeader>
-                <CardTitle>Content Management</CardTitle>
-                <CardDescription>Manage and track all your submitted content</CardDescription>
+                <CardTitle className="dark:text-white">Content Management</CardTitle>
+                <CardDescription className="dark:text-gray-400">
+                  Manage and track all your submitted content
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="text-center py-8">
                   <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Content Management</h3>
-                  <p className="text-gray-600 mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Content Management</h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">
                     This section would contain tools to manage your content submissions, track verification status, and
                     update content details.
                   </p>
@@ -317,16 +340,18 @@ export default function DashboardPage() {
           </TabsContent>
 
           <TabsContent value="analytics">
-            <Card>
+            <Card className="dark:bg-gray-800 dark:border-gray-700">
               <CardHeader>
-                <CardTitle>Performance Analytics</CardTitle>
-                <CardDescription>Detailed insights into your content performance</CardDescription>
+                <CardTitle className="dark:text-white">Performance Analytics</CardTitle>
+                <CardDescription className="dark:text-gray-400">
+                  Detailed insights into your content performance
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="text-center py-8">
                   <TrendingUp className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Analytics Dashboard</h3>
-                  <p className="text-gray-600 mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Analytics Dashboard</h3>
+                  <p className="text-gray-600 dark:text-gray-400 mb-4">
                     This section would contain detailed analytics about your content performance, audience engagement,
                     and revenue insights.
                   </p>
@@ -340,39 +365,45 @@ export default function DashboardPage() {
           </TabsContent>
 
           <TabsContent value="verification">
-            <Card>
+            <Card className="dark:bg-gray-800 dark:border-gray-700">
               <CardHeader>
-                <CardTitle>Verification Status</CardTitle>
-                <CardDescription>Manage your verification documents and status</CardDescription>
+                <CardTitle className="dark:text-white">Verification Status</CardTitle>
+                <CardDescription className="dark:text-gray-400">
+                  Manage your verification documents and status
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 border rounded-lg bg-green-50">
+                  <div className="flex items-center justify-between p-4 border dark:border-gray-700 rounded-lg bg-green-50 dark:bg-green-900/20">
                     <div className="flex items-center gap-3">
                       <CheckCircle className="h-5 w-5 text-green-600" />
                       <div>
-                        <p className="font-medium">Identity Verification</p>
-                        <p className="text-sm text-gray-600">Completed on Jan 15, 2024</p>
+                        <p className="font-medium dark:text-white">Identity Verification</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Completed on Jan 15, 2024</p>
                       </div>
                     </div>
-                    <Badge className="bg-green-100 text-green-800">Verified</Badge>
+                    <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                      Verified
+                    </Badge>
                   </div>
-                  <div className="flex items-center justify-between p-4 border rounded-lg bg-green-50">
+                  <div className="flex items-center justify-between p-4 border dark:border-gray-700 rounded-lg bg-green-50 dark:bg-green-900/20">
                     <div className="flex items-center gap-3">
                       <CheckCircle className="h-5 w-5 text-green-600" />
                       <div>
-                        <p className="font-medium">Content Portfolio</p>
-                        <p className="text-sm text-gray-600">Last updated Jan 20, 2024</p>
+                        <p className="font-medium dark:text-white">Content Portfolio</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Last updated Jan 20, 2024</p>
                       </div>
                     </div>
-                    <Badge className="bg-green-100 text-green-800">Approved</Badge>
+                    <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                      Approved
+                    </Badge>
                   </div>
-                  <div className="flex items-center justify-between p-4 border rounded-lg bg-yellow-50">
+                  <div className="flex items-center justify-between p-4 border dark:border-gray-700 rounded-lg bg-yellow-50 dark:bg-yellow-900/20">
                     <div className="flex items-center gap-3">
                       <AlertCircle className="h-5 w-5 text-yellow-600" />
                       <div>
-                        <p className="font-medium">Annual Review</p>
-                        <p className="text-sm text-gray-600">Due in 11 months</p>
+                        <p className="font-medium dark:text-white">Annual Review</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Due in 11 months</p>
                       </div>
                     </div>
                     <Badge variant="secondary">Upcoming</Badge>
