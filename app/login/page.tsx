@@ -121,7 +121,7 @@ export default function LoginPage() {
         </Card>
 
         {/* Demo Accounts */}
-        <Card className="bg-blue-50 border-blue-200">
+        <Card className="bg-blue-50 border-blue-200 text-black">
           <CardHeader>
             <CardTitle className="text-sm">Demo Accounts</CardTitle>
           </CardHeader>
