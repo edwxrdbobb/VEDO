@@ -35,7 +35,7 @@ export default function HomePage() {
               <Link href="/login">Login</Link>
             </Button>
             <Button asChild>
-              <Link href="/register">Get Started</Link>
+              <Link href="/signup">Sign Up</Link>
             </Button>
           </div>
         </div>

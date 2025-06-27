@@ -37,26 +37,24 @@ export async function submitCreatorRegistration(formData: CreatorRegistrationDat
   const supabase = createServerClient()
 
   try {
-    // First, create the user account
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-      email: formData.personalInfo.email,
-      password: "temp_password_" + Math.random().toString(36).substring(7),
-      email_confirm: true,
-      user_metadata: {
+    // Generate a temporary password for the user
+    const tempPassword = "temp_" + Math.random().toString(36).substring(7)
+
+    // Hash the password
+    const bcrypt = require("bcryptjs")
+    const saltRounds = 10
+    const passwordHash = await bcrypt.hash(tempPassword, saltRounds)
+
+    // Insert user record directly
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .insert({
+        email: formData.personalInfo.email,
+        password_hash: passwordHash,
         role: "creator",
-      },
-    })
-
-    if (authError) {
-      throw new Error(`Authentication error: ${authError.message}`)
-    }
-
-    // Insert user record
-    const { error: userError } = await supabase.from("users").insert({
-      id: authData.user.id,
-      email: formData.personalInfo.email,
-      role: "creator",
-    })
+      })
+      .select()
+      .single()
 
     if (userError) {
       throw new Error(`User creation error: ${userError.message}`)
@@ -66,7 +64,7 @@ export async function submitCreatorRegistration(formData: CreatorRegistrationDat
     const { data: creatorData, error: creatorError } = await supabase
       .from("content_creators")
       .insert({
-        user_id: authData.user.id,
+        user_id: userData.id,
         first_name: formData.personalInfo.firstName,
         last_name: formData.personalInfo.lastName,
         email: formData.personalInfo.email,
@@ -99,11 +97,12 @@ export async function submitCreatorRegistration(formData: CreatorRegistrationDat
     await supabase.from("system_logs").insert({
       action_type: "registration",
       description: `New creator registration: ${formData.personalInfo.firstName} ${formData.personalInfo.lastName}`,
-      user_id: authData.user.id,
+      user_id: userData.id,
       creator_id: creatorData.id,
       metadata: {
         content_type: formData.creatorInfo.contentType,
         primary_platform: formData.creatorInfo.primaryPlatform,
+        temp_password: tempPassword, // Store temp password for admin to share
       },
     })
 
@@ -111,9 +110,9 @@ export async function submitCreatorRegistration(formData: CreatorRegistrationDat
 
     return {
       success: true,
-      message:
-        "Registration submitted successfully! You will receive an email with login credentials once your application is approved.",
+      message: `Registration submitted successfully! Your temporary password is: ${tempPassword}. Please change it after your first login.`,
       vedoId: creatorData.vedo_id,
+      tempPassword: tempPassword,
     }
   } catch (error: any) {
     console.error("Registration error:", error)

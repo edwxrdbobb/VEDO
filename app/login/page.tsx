@@ -11,7 +11,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Shield, Eye, EyeOff } from "lucide-react"
-import { signIn } from "@/lib/auth"
+import { signIn, storeUserSession } from "@/lib/auth"
+import { useAuth } from "@/components/auth-provider"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -20,6 +21,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
+  const { setUser } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -27,8 +29,20 @@ export default function LoginPage() {
     setError("")
 
     try {
-      await signIn(email, password)
-      router.push("/dashboard")
+      const result = await signIn(email, password)
+
+      // Store user session
+      storeUserSession(result.user, true) // Remember user
+
+      // Update auth context
+      setUser(result.user)
+
+      // Redirect based on role
+      if (result.user.role === "admin") {
+        router.push("/admin")
+      } else {
+        router.push("/dashboard")
+      }
     } catch (err: any) {
       setError(err.message || "Login failed. Please check your credentials.")
     } finally {

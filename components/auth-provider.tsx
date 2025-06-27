@@ -1,21 +1,27 @@
 "use client"
 
 import type React from "react"
-
 import { createContext, useContext, useEffect, useState } from "react"
-import type { User } from "@supabase/supabase-js"
-import { supabase } from "@/lib/supabase"
+import { getCurrentUser, clearUserSession } from "@/lib/auth"
+
+interface User {
+  id: string
+  email: string
+  role: "creator" | "admin" | "moderator"
+}
 
 interface AuthContextType {
   user: User | null
   loading: boolean
   signOut: () => Promise<void>
+  setUser: (user: User | null) => void
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
   signOut: async () => {},
+  setUser: () => {},
 })
 
 export const useAuth = () => {
@@ -31,31 +37,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Get initial session
-    const getInitialSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      setUser(session?.user ?? null)
-      setLoading(false)
+    // Get initial user from storage
+    const getInitialUser = async () => {
+      try {
+        const currentUser = await getCurrentUser()
+        setUser(currentUser)
+      } catch (error) {
+        console.error("Failed to get current user:", error)
+        setUser(null)
+      } finally {
+        setLoading(false)
+      }
     }
 
-    getInitialSession()
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
-
-    return () => subscription.unsubscribe()
+    getInitialUser()
   }, [])
 
   const signOut = async () => {
-    await supabase.auth.signOut()
+    clearUserSession()
+    setUser(null)
   }
 
-  return <AuthContext.Provider value={{ user, loading, signOut }}>{children}</AuthContext.Provider>
+  return <AuthContext.Provider value={{ user, loading, signOut, setUser }}>{children}</AuthContext.Provider>
 }
