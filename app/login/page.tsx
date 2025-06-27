@@ -128,13 +128,16 @@ export default function LoginPage() {
           <CardContent className="space-y-2">
             <div className="text-xs space-y-1">
               <div>
-                <strong>Creator:</strong> sarah@techsarah.com / password123
-              </div>
-              <div>
                 <strong>Admin:</strong> admin@vedo.gov.sl / admin123
               </div>
               <div>
-                <strong>Moderator:</strong> moderator@vedo.gov.sl / mod123
+                <strong>Creator (Verified):</strong> sarah@techsarah.com / sarah123
+              </div>
+              <div>
+                <strong>Creator (Pending):</strong> mohamed@slblogger.com / mohamed123
+              </div>
+              <div>
+                <strong>Moderator:</strong> moderator@vedo.gov.sl / moderator123
               </div>
             </div>
           </CardContent>
