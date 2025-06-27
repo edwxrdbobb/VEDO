@@ -29,9 +29,6 @@ export default function HomePage() {
             <Link href="/admin" className="text-gray-600 hover:text-blue-600">
               Admin
             </Link>
-            <Link href="/setup" className="text-gray-600 hover:text-blue-600">
-              Setup
-            </Link>
           </nav>
           <div className="flex gap-2">
             <Button variant="outline" asChild>
