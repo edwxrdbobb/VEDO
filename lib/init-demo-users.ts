@@ -61,14 +61,25 @@ const DEMO_USERS: DemoUser[] = [
 ]
 
 export async function initializeDemoUsers() {
-  const supabase = createServerClient()
+  let supabase
+
+  try {
+    supabase = createServerClient()
+  } catch (error: any) {
+    throw new Error(`Failed to create Supabase client: ${error.message}`)
+  }
 
   console.log("🚀 Initializing demo users...")
 
   for (const user of DEMO_USERS) {
     try {
       // Check if user already exists in auth.users
-      const { data: existingAuthUser } = await supabase.auth.admin.getUserById(user.id)
+      const { data: existingAuthUser, error: getUserError } = await supabase.auth.admin.getUserById(user.id)
+
+      if (getUserError && getUserError.message !== "User not found") {
+        console.error(`❌ Error checking auth user ${user.email}:`, getUserError.message)
+        continue
+      }
 
       if (!existingAuthUser.user) {
         // Create user in Supabase Auth
@@ -116,6 +127,9 @@ export async function initializeDemoUsers() {
         console.log(`✅ Created user record: ${user.email}`)
       } else if (!checkError) {
         console.log(`ℹ️  User record already exists: ${user.email}`)
+      } else {
+        console.error(`❌ Error checking user record ${user.email}:`, checkError.message)
+        continue
       }
 
       // For creators, check if content_creator record exists
@@ -157,10 +171,12 @@ export async function initializeDemoUsers() {
           console.log(`✅ Created creator record: ${user.email}`)
         } else if (!creatorCheckError) {
           console.log(`ℹ️  Creator record already exists: ${user.email}`)
+        } else {
+          console.error(`❌ Error checking creator record ${user.email}:`, creatorCheckError.message)
         }
       }
-    } catch (error) {
-      console.error(`❌ Error processing user ${user.email}:`, error)
+    } catch (error: any) {
+      console.error(`❌ Error processing user ${user.email}:`, error.message)
     }
   }
 
@@ -168,9 +184,9 @@ export async function initializeDemoUsers() {
 }
 
 export async function checkDemoUsersExist(): Promise<boolean> {
-  const supabase = createServerClient()
-
   try {
+    const supabase = createServerClient()
+
     const { data, error } = await supabase
       .from("users")
       .select("email")
@@ -185,8 +201,8 @@ export async function checkDemoUsersExist(): Promise<boolean> {
     }
 
     return data.length === DEMO_USERS.length
-  } catch (error) {
-    console.error("Error checking demo users:", error)
+  } catch (error: any) {
+    console.error("Error checking demo users:", error.message)
     return false
   }
 }

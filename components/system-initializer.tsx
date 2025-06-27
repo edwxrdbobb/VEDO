@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Shield, Users, CheckCircle, AlertCircle, Loader2, Play } from "lucide-react"
 import { initializeSystem, getSystemStatus } from "@/actions/init-system"
 import { getDemoCredentials } from "@/lib/init-demo-users"
+import { EnvironmentCheck } from "./environment-check"
 
 export function SystemInitializer() {
   const [isInitializing, setIsInitializing] = useState(false)
@@ -25,8 +26,16 @@ export function SystemInitializer() {
   }, [])
 
   const checkStatus = async () => {
-    const status = await getSystemStatus()
-    setSystemStatus(status)
+    try {
+      const status = await getSystemStatus()
+      setSystemStatus(status)
+    } catch (error: any) {
+      setSystemStatus({
+        initialized: false,
+        demoUsersCount: 0,
+        error: `Failed to check status: ${error.message}`,
+      })
+    }
   }
 
   const handleInitialize = async () => {
@@ -36,11 +45,13 @@ export function SystemInitializer() {
     try {
       const result = await initializeSystem()
       setInitResult(result)
-      await checkStatus() // Refresh status after initialization
-    } catch (error) {
+      if (result.success) {
+        await checkStatus() // Refresh status after successful initialization
+      }
+    } catch (error: any) {
       setInitResult({
         success: false,
-        message: "Initialization failed. Please try again.",
+        message: `Initialization failed: ${error.message}`,
       })
     } finally {
       setIsInitializing(false)
@@ -56,6 +67,9 @@ export function SystemInitializer() {
         </div>
         <p className="text-gray-600">Initialize the system with demo users and sample data</p>
       </div>
+
+      {/* Environment Check */}
+      <EnvironmentCheck />
 
       {/* System Status */}
       <Card>
@@ -106,7 +120,7 @@ export function SystemInitializer() {
       </Card>
 
       {/* Initialization Button */}
-      {systemStatus && !systemStatus.initialized && (
+      {systemStatus && !systemStatus.initialized && !systemStatus.error && (
         <Card>
           <CardHeader>
             <CardTitle>Initialize System</CardTitle>
