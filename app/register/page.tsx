@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -16,6 +16,7 @@ import { submitCreatorRegistration } from "@/actions/creator-registration"
 import { useActionState } from "react"
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     personalInfo: {
       firstName: "",
@@ -60,7 +61,7 @@ export default function RegisterPage() {
     // The form data will be automatically passed to the server action
     const formDataToSubmit = new FormData()
     formDataToSubmit.append("data", JSON.stringify(formData))
-
+    router.push("login");
     action(formData)
   }
 
