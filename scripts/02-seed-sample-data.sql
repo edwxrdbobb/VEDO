@@ -8,7 +8,6 @@ INSERT INTO users (id, email, password_hash, role) VALUES
 ('550e8400-e29b-41d4-a716-446655440004', 'fatima@fashionfreetown.com', '$2b$10$example_hash_4', 'creator'),
 ('550e8400-e29b-41d4-a716-446655440005', 'moderator@vedo.gov.sl', '$2b$10$example_hash_5', 'moderator');
 
--- Insert sample content creators
 
 -- Insert sample content creators
 INSERT INTO content_creators (
