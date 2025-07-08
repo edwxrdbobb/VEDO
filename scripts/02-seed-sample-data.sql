@@ -179,7 +179,7 @@ INSERT INTO content_submissions (
     published_at, submitted_at
 ) VALUES
 (
-    '770e8400-e29b-41d4-a716-446655440001',
+    '770e8400-e29b-41d4-a716-446655440101', -- New UUID
     '660e8400-e29b-41d4-a716-446655440001',
     'AI in Sierra Leone: Opportunities and Challenges',
     'Exploring the potential of artificial intelligence in transforming various sectors in Sierra Leone.',
@@ -190,7 +190,7 @@ INSERT INTO content_submissions (
     '2024-01-20 09:00:00', '2024-01-20 09:15:00'
 ),
 (
-    '770e8400-e29b-41d4-a716-446655440002',
+    '770e8400-e29b-41d4-a716-446655440102', -- New UUID
     '660e8400-e29b-41d4-a716-446655440001',
     'Digital Payment Solutions for Small Businesses',
     'A comprehensive guide to digital payment options available for small businesses in Sierra Leone.',
@@ -201,7 +201,7 @@ INSERT INTO content_submissions (
     '2024-01-18 11:00:00', '2024-01-18 11:30:00'
 ),
 (
-    '770e8400-e29b-41d4-a716-446655440003',
+    '770e8400-e29b-41d4-a716-446655440103', -- New UUID
     '660e8400-e29b-41d4-a716-446655440001',
     'Cybersecurity Best Practices for Content Creators',
     'Essential cybersecurity tips for digital content creators to protect their work and personal information.',
