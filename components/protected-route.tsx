@@ -2,38 +2,42 @@
 
 import type React from "react"
 
-import { useAuth } from "./auth-provider"
+import { useAuth } from "@/lib/auth-context"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
-import { Shield } from "lucide-react"
 
 interface ProtectedRouteProps {
   children: React.ReactNode
-  requiredRole?: "creator" | "admin" | "moderator"
+  requiredRole?: "creator" | "admin"
 }
 
 export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
-  const { user, loading } = useAuth()
+  const { user, userRole, loading } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.push("/login")
+    if (!loading) {
+      if (!user) {
+        router.push("/login")
+        return
+      }
+
+      if (requiredRole && userRole !== requiredRole) {
+        router.push("/unauthorized")
+        return
+      }
     }
-  }, [user, loading, router])
+  }, [user, userRole, loading, requiredRole, router])
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <Shield className="h-8 w-8 text-blue-600 mx-auto mb-4 animate-spin" />
-          <p>Loading...</p>
-        </div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
       </div>
     )
   }
 
-  if (!user) {
+  if (!user || (requiredRole && userRole !== requiredRole)) {
     return null
   }
 

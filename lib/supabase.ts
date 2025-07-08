@@ -1,116 +1,43 @@
-// Mock Supabase client for frontend-only operation
-class MockSupabaseAuth {
-  private listeners: Array<(event: string, session: any) => void> = []
-  private currentSession: any = null
+import { createClient } from "@supabase/supabase-js"
 
-  onAuthStateChange(callback: (event: string, session: any) => void) {
-    this.listeners.push(callback)
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-    // Immediately call with current session
-    setTimeout(() => {
-      callback("INITIAL_SESSION", this.currentSession)
-    }, 0)
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-    return {
-      data: {
-        subscription: {
-          unsubscribe: () => {
-            const index = this.listeners.indexOf(callback)
-            if (index > -1) {
-              this.listeners.splice(index, 1)
-            }
-          },
-        },
-      },
-    }
-  }
-
-  async getSession() {
-    return {
-      data: {
-        session: this.currentSession,
-      },
-      error: null,
-    }
-  }
-
-  async signInWithPassword({ email, password }: { email: string; password: string }) {
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-
-    // Mock user data
-    const mockUser = {
-      id: "123",
-      email,
-      user_metadata: { role: "creator" },
-    }
-
-    this.currentSession = {
-      user: mockUser,
-      access_token: "mock-token",
-    }
-
-    // Emit sign in event
-    this.listeners.forEach((callback) => {
-      callback("SIGNED_IN", this.currentSession)
-    })
-
-    return {
-      data: {
-        user: mockUser,
-        session: this.currentSession,
-      },
-      error: null,
-    }
-  }
-
-  async signUp({ email, password }: { email: string; password: string }) {
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-
-    return {
-      data: {
-        user: { id: "123", email },
-        session: null,
-      },
-      error: null,
-    }
-  }
-
-  async signOut() {
-    this.currentSession = null
-
-    // Emit sign out event
-    this.listeners.forEach((callback) => {
-      callback("SIGNED_OUT", null)
-    })
-
-    return { error: null }
-  }
+// Server-side client for admin operations
+export const createServerClient = () => {
+  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
 }
 
-class MockSupabaseClient {
-  auth = new MockSupabaseAuth()
-
-  from(table: string) {
-    return {
-      select: () => ({
-        eq: () => ({
-          single: () => Promise.resolve({ data: null, error: null }),
-        }),
-      }),
-      insert: () => Promise.resolve({ data: null, error: null }),
-      update: () => Promise.resolve({ data: null, error: null }),
-      delete: () => Promise.resolve({ data: null, error: null }),
-    }
-  }
-
-  storage = {
-    from: () => ({
-      upload: () => Promise.resolve({ data: null, error: null }),
-      getPublicUrl: () => ({ data: { publicUrl: "" } }),
-    }),
-  }
+// Database types
+export interface Creator {
+  id: string
+  email: string
+  full_name: string
+  creator_name: string
+  bio?: string
+  avatar_url?: string
+  status: "pending" | "approved" | "rejected"
+  verification_status: "unverified" | "pending" | "verified"
+  created_at: string
+  updated_at: string
+  qr_code?: string
 }
 
-export const supabase = new MockSupabaseClient()
+export interface User {
+  id: string
+  email: string
+  role: "creator" | "admin"
+  created_at: string
+}
+
+export interface Message {
+  id: string
+  sender_id: string
+  recipient_id: string
+  subject: string
+  content: string
+  read: boolean
+  created_at: string
+}
