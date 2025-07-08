@@ -1,22 +1,48 @@
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { Shield, Search, CheckCircle, AlertCircle, Globe, Calendar, Award } from "lucide-react"
+import { Shield, Search, CheckCircle, AlertCircle, Globe, Calendar, Award, RefreshCw } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { mockAuth } from "@/lib/mock-data"
+import { useAuth } from "@/lib/auth-context"
 
 export default function VerifyPage() {
+  const { user } = useAuth()
+  const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
   const [searchResult, setSearchResult] = useState(null)
   const [isSearching, setIsSearching] = useState(false)
   const [error, setError] = useState("")
+  const [countdown, setCountdown] = useState(60)
+  const [resendDisabled, setResendDisabled] = useState(true)
+
+  useEffect(() => {
+    if (user) {
+      router.push("/")
+    }
+  }, [user, router])
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer)
+          setResendDisabled(false)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [])
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -56,16 +82,22 @@ export default function VerifyPage() {
     }
   }
 
+  const handleResendEmail = () => {
+    // In a real app, this would call an API to resend the verification email
+    setResendDisabled(true)
+    setCountdown(60)
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 py-8 dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 px-4">
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <Shield className="h-8 w-8 text-blue-600" />
+            <Shield className="h-8 w-8 text-blue-600 dark:text-primary" />
             <h1 className="text-2xl font-bold">Creator Verification</h1>
           </div>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-muted-foreground">
             Verify the authenticity of digital content creators registered in Sierra Leone
           </p>
         </div>
@@ -247,6 +279,38 @@ export default function VerifyPage() {
           </Card>
         )}
 
+        {/* Email Verification Section */}
+        {!searchResult && (
+          <Card className="w-full max-w-md mt-8">
+            <CardHeader className="text-center">
+              <div className="flex justify-center mb-4">
+                <Shield className="h-12 w-12 text-primary" />
+              </div>
+              <CardTitle className="text-2xl">Verify Your Email</CardTitle>
+              <CardDescription>We've sent a verification email to your inbox</CardDescription>
+            </CardHeader>
+            <CardContent className="text-center">
+              <div className="flex flex-col items-center justify-center space-y-6">
+                <div className="rounded-full bg-green-100 dark:bg-green-900/20 p-4">
+                  <CheckCircle className="h-12 w-12 text-green-600 dark:text-green-400" />
+                </div>
+
+                <p className="text-muted-foreground">
+                  Please check your email and click the verification link to complete your registration.
+                </p>
+
+                <div className="flex flex-col items-center space-y-2">
+                  <p className="text-sm text-muted-foreground">Didn't receive an email?</p>
+                  <Button variant="outline" onClick={handleResendEmail} disabled={resendDisabled}>
+                    <RefreshCw className={`h-4 w-4 mr-2 ${resendDisabled ? "animate-spin" : ""}`} />
+                    {resendDisabled ? `Resend in ${countdown}s` : "Resend Email"}
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Information Section */}
         <Card className="mt-8">
           <CardHeader>
@@ -255,7 +319,7 @@ export default function VerifyPage() {
           <CardContent className="space-y-4">
             <div>
               <h4 className="font-medium mb-2">What does verification mean?</h4>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-muted-foreground">
                 VEDO verification confirms that a content creator is officially registered with the Government of Sierra
                 Leone, has provided valid identification, and agrees to comply with intellectual property and cybercrime
                 laws.
@@ -266,21 +330,25 @@ export default function VerifyPage() {
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Badge variant="outline">Bronze</Badge>
-                  <span className="text-sm text-gray-600">Basic identity verification</span>
+                  <span className="text-sm text-gray-600 dark:text-muted-foreground">Basic identity verification</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge className="bg-gray-100 text-gray-800">Silver</Badge>
-                  <span className="text-sm text-gray-600">Identity + content portfolio verification</span>
+                  <span className="text-sm text-gray-600 dark:text-muted-foreground">
+                    Identity + content portfolio verification
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge className="bg-yellow-100 text-yellow-800">Gold</Badge>
-                  <span className="text-sm text-gray-600">Full verification with business registration</span>
+                  <span className="text-sm text-gray-600 dark:text-muted-foreground">
+                    Full verification with business registration
+                  </span>
                 </div>
               </div>
             </div>
             <div>
               <h4 className="font-medium mb-2">For Businesses and Organizations</h4>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-muted-foreground">
                 Use this verification system to confirm the authenticity of content creators before partnerships,
                 collaborations, or content licensing agreements.
               </p>

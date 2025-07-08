@@ -1,8 +1,9 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
+import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -10,8 +11,8 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Shield, Upload, User, Globe, FileText } from "lucide-react"
-import Link from "next/link"
+import { Shield, Upload, User, Globe, FileText, Eye, EyeOff } from "lucide-react"
+import { useAuth } from "@/lib/auth-context"
 import { mockAuth } from "@/lib/mock-data"
 
 export default function RegisterPage() {
@@ -47,8 +48,15 @@ export default function RegisterPage() {
     },
   })
 
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [result, setResult] = useState<{ success: boolean; message: string; vedoId?: string } | null>(null)
+
+  const { signUp } = useAuth()
+  const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -60,6 +68,15 @@ export default function RegisterPage() {
     setIsSubmitting(true)
     setResult(null)
 
+    if (password !== confirmPassword) {
+      setResult({
+        success: false,
+        message: "Passwords do not match",
+      })
+      setIsSubmitting(false)
+      return
+    }
+
     try {
       const submissionResult = await mockAuth.register(formData)
       setResult(submissionResult)
@@ -70,6 +87,17 @@ export default function RegisterPage() {
       })
     } finally {
       setIsSubmitting(false)
+    }
+
+    const authResult = await signUp(email, password, "creator")
+
+    if (authResult.error) {
+      setResult({
+        success: false,
+        message: authResult.error,
+      })
+    } else {
+      router.push("/verify")
     }
   }
 
@@ -140,6 +168,7 @@ export default function RegisterPage() {
                       })
                     }
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
                 <div>
@@ -154,6 +183,7 @@ export default function RegisterPage() {
                       })
                     }
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
               </div>
@@ -170,6 +200,7 @@ export default function RegisterPage() {
                       })
                     }
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
                 <div>
@@ -185,6 +216,7 @@ export default function RegisterPage() {
                       })
                     }
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
               </div>
@@ -200,6 +232,7 @@ export default function RegisterPage() {
                     })
                   }
                   required
+                  disabled={isSubmitting}
                 />
               </div>
             </CardContent>
@@ -227,6 +260,7 @@ export default function RegisterPage() {
                     })
                   }
                   required
+                  disabled={isSubmitting}
                 />
               </div>
               <div>
@@ -242,6 +276,7 @@ export default function RegisterPage() {
                     })
                   }
                   required
+                  disabled={isSubmitting}
                 />
               </div>
               <div className="grid md:grid-cols-2 gap-4">
@@ -254,6 +289,7 @@ export default function RegisterPage() {
                         creatorInfo: { ...formData.creatorInfo, contentType: value },
                       })
                     }
+                    disabled={isSubmitting}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select content type" />
@@ -281,6 +317,7 @@ export default function RegisterPage() {
                         creatorInfo: { ...formData.creatorInfo, primaryPlatform: value },
                       })
                     }
+                    disabled={isSubmitting}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select platform" />
@@ -312,6 +349,7 @@ export default function RegisterPage() {
                       creatorInfo: { ...formData.creatorInfo, websiteUrl: e.target.value },
                     })
                   }
+                  disabled={isSubmitting}
                 />
               </div>
               <div>
@@ -329,6 +367,7 @@ export default function RegisterPage() {
                         },
                       })
                     }
+                    disabled={isSubmitting}
                   />
                   <Input
                     placeholder="Twitter/X URL"
@@ -342,6 +381,7 @@ export default function RegisterPage() {
                         },
                       })
                     }
+                    disabled={isSubmitting}
                   />
                   <Input
                     placeholder="Instagram URL"
@@ -355,6 +395,7 @@ export default function RegisterPage() {
                         },
                       })
                     }
+                    disabled={isSubmitting}
                   />
                   <Input
                     placeholder="YouTube URL"
@@ -368,6 +409,7 @@ export default function RegisterPage() {
                         },
                       })
                     }
+                    disabled={isSubmitting}
                   />
                 </div>
               </div>
@@ -390,7 +432,7 @@ export default function RegisterPage() {
                   <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
                   <p className="text-sm text-gray-600">Click to upload or drag and drop</p>
                   <p className="text-xs text-gray-500">PDF, JPG, PNG up to 5MB</p>
-                  <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png" />
+                  <input type="file" className="hidden" accept=".pdf,.jpg,.jpeg,.png" disabled={isSubmitting} />
                 </div>
               </div>
               <div>
@@ -399,7 +441,13 @@ export default function RegisterPage() {
                   <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
                   <p className="text-sm text-gray-600">Upload up to 5 content samples</p>
                   <p className="text-xs text-gray-500">Images, videos, documents up to 10MB each</p>
-                  <input type="file" className="hidden" multiple accept="image/*,video/*,.pdf,.doc,.docx" />
+                  <input
+                    type="file"
+                    className="hidden"
+                    multiple
+                    accept="image/*,video/*,.pdf,.doc,.docx"
+                    disabled={isSubmitting}
+                  />
                 </div>
               </div>
             </CardContent>
@@ -419,6 +467,7 @@ export default function RegisterPage() {
                         verification: { ...formData.verification, agreesToTerms: checked as boolean },
                       })
                     }
+                    disabled={isSubmitting}
                   />
                   <Label htmlFor="terms" className="text-sm leading-relaxed">
                     I agree to the{" "}
@@ -439,6 +488,7 @@ export default function RegisterPage() {
                         verification: { ...formData.verification, agreesToIPPolicy: checked as boolean },
                       })
                     }
+                    disabled={isSubmitting}
                   />
                   <Label htmlFor="ipPolicy" className="text-sm leading-relaxed">
                     I acknowledge the{" "}
@@ -451,6 +501,58 @@ export default function RegisterPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Password Fields */}
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={isSubmitting}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  disabled={isSubmitting}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-0 top-0 h-full px-3"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <div className="relative">
+                <Input
+                  id="confirmPassword"
+                  type={showPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  disabled={isSubmitting}
+                />
+              </div>
+            </div>
+          </div>
 
           {/* Submit Button */}
           <div className="flex gap-4">
